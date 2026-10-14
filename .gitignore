@@ -2,3 +2,8 @@
 # unzipped lesson folders (the zips are committed)
 course_output/Cloud_for_AI_Course/CAI-0[2-9]_*/
 course_output/Cloud_for_AI_Course/CAI-1*_*/
+
+# single-lesson and master zips are kept local (master zip exceeds the 100 MB GitHub limit)
+course_output/Cloud_for_AI_Course/CAI-0[6-9]_*.zip
+course_output/Cloud_for_AI_Course/CAI-1[0-2]_*.zip
+course_output/Cloud_for_AI_Course/*All_Lessons*.zip
