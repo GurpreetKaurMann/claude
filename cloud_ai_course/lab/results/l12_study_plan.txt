@@ -1,0 +1,27 @@
+plan: 16 weeks at about 10 h/week = 160 hours
+
+hours/week   weeks
+         5    32.0
+        10    16.0
+        15    10.7
+        20     8.0
+
+your setting: 10 h/week -> 16.0 weeks
+
+stop                           weeks   low $  high $
+1 Cloud fundamentals               2       0       5
+2 Containers + Kubernetes          3       3      11
+3 Serve a model                    2       2       6
+4 RAG, agents, MCP + evals         3       0      10
+5 MLOps, IaC, observability        3       2      25
+6 Distributed training             3      25      98
+all six stops (before credits)    16      32     155
+new-account credits quoted: AWS up to $200 + GCP $300 + Azure $200 = $700 -> the notebook estimates $150-250 out of pocket in total if everything is torn down
+stages 1-5 only: $7 to $57
+
+THE FORGOTTEN GPU: one L4 node left up for a month = 730 h x $0.50-1.20
+  $365 to $876  vs the whole path at $155 (high) -> 2.4x to 5.7x the entire path
+  teardown habit: terraform destroy, then list clusters and expect nothing
+
+EKS control plane: $0.10/h standard support vs ~$0.60/h extended support (notebook; one source says $0.50)
+  per month: $73 vs $438

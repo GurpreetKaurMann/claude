@@ -1,0 +1,15 @@
+request                               narrow role  broad role
+invoke approved model, EU                 allowed     allowed
+invoke streaming, EU                      allowed     allowed
+invoke a different vendor model            DENIED     allowed
+invoke approved model in the US            DENIED      DENIED
+create a guardrail                         DENIED     allowed
+delete a custom model                      DENIED     allowed
+start a fine-tuning job                    DENIED     allowed
+change logging config                      DENIED     allowed
+read a storage bucket                      DENIED      DENIED
+invoke approved model, EU west             DENIED     allowed
+invoke a model in Asia                     DENIED      DENIED
+list foundation models                     DENIED     allowed
+
+allowed: narrow role 2 of 12 · broad role 9 of 12   (the Region guardrail applies to both)

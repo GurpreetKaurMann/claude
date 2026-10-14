@@ -1,0 +1,6 @@
+5 tenants, 5000 documents, a tenant-2 user asks 200 questions, top 5 wanted
+method                   other tenants' docs shown   docs returned per question
+no filter                                      833                         5.00
+filter AFTER search                              0                         0.83
+filter IN search                                 0                         5.00
+(no filter: 83% of everything shown belonged to someone else)

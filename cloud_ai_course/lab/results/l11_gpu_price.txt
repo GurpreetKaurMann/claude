@@ -1,0 +1,30 @@
+REAL PRICE = list $/GPU-hr / utilisation  (utilisation = share of paid hours doing useful work)
+  util   H100 @ $3.17   H100 @ $6.88
+    5%          63.40         137.60
+   22%          14.41          31.27
+   50%           6.34          13.76
+   80%           3.96           8.60
+  100%           3.17           6.88
+
+5% -> 50% utilisation makes a useful hour 10x cheaper; the best rate discounts are ~2-3x. Fix idle before you negotiate price.
+
+COMMITMENT RULE: commit at discount d wins only if utilisation of the committed capacity > 1 - d
+ discount  break-even util   check at 100 paid hours of a $10 rate (commit pays for all hours)
+      30%              70%   util  60%: commit $    700 vs on-demand $    600 -> on-demand wins
+      30%              70%   util  80%: commit $    700 vs on-demand $    800 -> commit wins
+      40%              60%   util  50%: commit $    600 vs on-demand $    500 -> on-demand wins
+      40%              60%   util  70%: commit $    600 vs on-demand $    700 -> commit wins
+      55%              45%   util  35%: commit $    450 vs on-demand $    350 -> on-demand wins
+      55%              45%   util  55%: commit $    450 vs on-demand $    550 -> commit wins
+
+ONE TRAINING RUN: 64 H100 x 14 days x 24 h
+21,504 GPU-hours
+neocloud index $3.17                           $    68,168
+market average $3.84                           $    82,575
+AWS Capacity Block $5.97                       $   128,379
+hyperscaler on-demand $6.88                    $   147,948
+spot ~60% off index ($1.27) before restarts    $    27,267
+spread between cheapest and dearest: 5.4x  (spot excludes lost steps and restarts: see lesson 2)
+
+AWS CAPACITY BLOCK price rises in 2026: +15%, +20%, +15%
+compounded: 1.59x in a year

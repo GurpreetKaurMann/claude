@@ -1,0 +1,36 @@
+ L label       status   claim
+ 1 arithmetic  ok       70B FP8 + 32 chats + headroom = 187 GB
+ 1 measured    ok       batch 256 serves 4,180 tokens/s vs 387 at batch 1
+ 2 simulation  ok       spot with no checkpoints: 2,203,564 hours for a 100 hour job
+ 2 simulation  ok       checkpoint about every 34 min: 108.8 hours
+ 2 simulation  ok       scale to zero: 4.04 GPU-hours a day instead of 24
+ 3 measured    ok       code change ships 1 MB, new weights 401 MB (layer order)
+ 3 simulation  ok       3 jobs on 16 GPUs deadlock 94.8% without gang scheduling
+ 4 measured    ok       20,000 small files read 25.1x slower than one shard
+ 4 measured    ok       int8 vectors: 4x smaller, recall@10 0.985
+ 4 arithmetic  ok       100 TB egress at $0.09/GB = $9,000
+ 5 measured    ok       mixed Adam training state = 16.0 bytes per parameter
+ 5 measured    ok       LoRA rank 8 trains 0.97% of parameters
+ 5 simulation  ok       pipeline bubble 42.9% at p=4, m=4
+ 6 measured    ok       KV cache: 12.1x faster generation
+ 6 simulation  ok       continuous batching 1,243 vs 335 tokens/s
+ 6 measured    ok       int8 groups of 64: 1.4% error
+ 7 synthetic   ok       eval gate blocks a prompt that raised the average (refund -50)
+ 7 simulation  ok       a 90% agent passes 5 runs in a row 59% of the time
+ 7 simulation  ok       5% canary: 9.4 bad responses before rollback
+ 8 measured    ok       300-word chunks, dense stand-in hit@3 91.7%
+ 9 simulation  ok       restart without keys: 2 refunds
+ 9 simulation  ok       retries without jitter: last success at 211 s
+ 9 arithmetic  ok       8x steps = 24.2x input tokens
+10 simulation  ok       keyword filter: 9 of 12 attacks still leaked
+10 simulation  ok       egress allowlist: 0 of 12 left, model fooled 12/12
+10 synthetic   ok       no tenant filter: 833 of 1,000 results not yours
+10 simulation  ok       broad role allowed 9 of 12, narrow 2
+10 synthetic   ok       PII patterns found 58% overall, 0% of names
+11 arithmetic  ok       H100 at 5% use: $63.40 per useful hour
+11 measured    ok       timestamp on top of the prompt: 0% of tokens cached
+11 measured    ok       timestamp after the shared part: 74.9% cached
+11 arithmetic  ok       one H100 beats a Sonnet-class API above 21.1M tokens/day
+
+32 of 32 headline claims found in their saved results
+by label: arithmetic 5 · measured 11 · simulation 13 · synthetic 3

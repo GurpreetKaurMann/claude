@@ -9,6 +9,9 @@ L = {
  7: dict(lines=[('BETTER SCORE', 'w'), ('WORSE PRODUCT', 'c'), ('THE EVAL GATE', 'w'), ('BLOCKED IT', 'r')], icon='shield'),
  8: dict(lines=[('RAG TESTED ON', 'w'), ('24 QUESTIONS', 'c'), ('THE FANCY FUSION:', 'w'), ('DID NOT WIN', 'r')], icon='search'),
  9: dict(lines=[('YOUR AGENT', 'w'), ('WILL CRASH', 'c'), ('THE DOUBLE REFUND:', 'w'), ('PREVENTABLE', 'r')], icon='nodes'),
+ 10: dict(lines=[('THE FILTER STOPPED', 'w'), ('3 OF 12', 'c'), ('ATTACKS. THE FIX:', 'w'), ('ARCHITECTURE', 'r')], icon='shield'),
+ 11: dict(lines=[('A $3 GPU', 'w'), ('AT 5% USE', 'c'), ('REALLY COSTS', 'w'), ('$63', 'r')], icon='chip'),
+ 12: dict(lines=[('ZERO TO CLOUD', 'w'), ('AI ENGINEER', 'c'), ('IN 16 WEEKS:', 'w'), ('THE ROADMAP', 'r')], icon='award'),
 }
 
 # vertical covers: Shorts and the Instagram Reel (Reel key content stays inside the centre 1080x1350)
@@ -40,4 +43,13 @@ V = {
  9: [dict(id='s1', file='Short1_Cover', tag='SHORT', icon='nodes', lines=[('CRASH', 'w'), ('RESTART', 'c'), ('2 REFUNDS', 'r')], sub='AI AGENT, SIMULATED'),
      dict(id='s2', file='Short2_Cover', tag='SHORT', icon='clock', lines=[('211 SECONDS', 'w'), ('TO 9.9', 'c'), ('ONE NUMBER', 'r')], sub='RETRY JITTER, SIMULATED'),
      dict(id='r1', file='Reel1_Cover_Instagram', tag='SAVE THIS', icon='layers', lines=[('8X STEPS', 'w'), ('24X COST', 'c'), ('AGENT LOOPS', 'r')], sub='THEY RE-SEND EVERYTHING')],
+ 10: [dict(id='s1', file='Short1_Cover', tag='SHORT', icon='shield', lines=[('FILTER', 'w'), ('3 OF 12', 'c'), ('DESIGN: 0 LEAKS', 'r')], sub='PROMPT INJECTION, TESTED'),
+      dict(id='s2', file='Short2_Cover', tag='SHORT', icon='search', lines=[('83%', 'w'), ('OF RESULTS', 'c'), ('NOT YOURS', 'r')], sub='RAG WITHOUT A FILTER'),
+      dict(id='r1', file='Reel1_Cover_Instagram', tag='SAVE THIS', icon='shield', lines=[('BROAD ROLE', 'w'), ('9 OF 12', 'c'), ('ALLOWED', 'r')], sub='LEAST PRIVILEGE, TESTED')],
+ 11: [dict(id='s1', file='Short1_Cover', tag='SHORT', icon='chip', lines=[('$3.17 GPU', 'w'), ('REALLY', 'c'), ('$63', 'r')], sub='THE UTILISATION SUM'),
+      dict(id='s2', file='Short2_Cover', tag='SHORT', icon='clock', lines=[('ONE LINE', 'w'), ('TRIPLES', 'c'), ('YOUR BILL', 'r')], sub='THE PROMPT CACHE MISTAKE'),
+      dict(id='r1', file='Reel1_Cover_Instagram', tag='SAVE THIS', icon='cloud', lines=[('ONE GPU', 'w'), ('NEVER BEATS', 'c'), ('THIS API', 'r')], sub='THE SELF-HOST SUM')],
+ 12: [dict(id='s1', file='Short1_Cover', tag='SHORT', icon='clock', lines=[('ONE GPU LEFT ON', 'w'), ('$876', 'c'), ('A MONTH', 'r')], sub='MORE THAN THE WHOLE PATH'),
+      dict(id='s2', file='Short2_Cover', tag='SHORT', icon='award', lines=[('6 STOPS', 'w'), ('16 WEEKS', 'c'), ('IN ORDER', 'r')], sub='CLOUD AI ENGINEER ROADMAP'),
+      dict(id='r1', file='Reel1_Cover_Instagram', tag='SAVE THIS', icon='doc', lines=[('3 AI CERTS', 'w'), ('WERE', 'c'), ('RETIRED', 'r')], sub='CHECK THE CODE FIRST')],
 }

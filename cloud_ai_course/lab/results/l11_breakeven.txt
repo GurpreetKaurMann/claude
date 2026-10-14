@@ -1,0 +1,28 @@
+one H100 24/7 = $76.08/day; capacity at 400 tok/s = 34.6M tokens/day
+
+SELF-HOST $/MTok = GPU $/hr / (tok/s x 3600 x utilisation) x 1e6
+  utilisation 100%: $ 2.20 per MTok
+  utilisation  60%: $ 3.67 per MTok
+  utilisation  40%: $ 5.50 per MTok
+  utilisation  15%: $14.68 per MTok
+
+BREAK-EVEN volume = GPU $/day / API blended $/MTok
+  Opus 5.5    $ 7.20:   10.6M tokens/day -> self-host can win above this
+  Sonnet 5.5  $ 3.60:   21.1M tokens/day -> narrow window up to the GPU limit
+  Haiku 5.5   $ 0.18:  422.7M tokens/day -> never on one GPU (above its capacity)
+  Sonnet 5.5 with the GPU at an AWS block price $5.97/hr: 39.8M tokens/day (capacity 34.6M) -> never on one GPU
+
+SHAPES: cost per day at different volumes (M tokens/day), one H100, step when full
+  volume  API Sonnet  self-host
+     5.0       18.00      76.08  (1 GPU)
+    10.0       36.00      76.08  (1 GPU)
+    21.1       75.96      76.08  (1 GPU)
+    30.0      108.00      76.08  (1 GPU)
+    34.0      122.40      76.08  (1 GPU)
+    45.0      162.00     152.16  (2 GPUs)
+    69.0      248.40     152.16  (2 GPUs)
+
+SIMULATION: bursty daily traffic on a fixed single GPU (mean 20M tokens/day, daily swings)
+  all API (Sonnet 5.5): $31,909/yr   self-host base load + API overflow: $31,678/yr
+  GPU actually used: 62% of its capacity; 12.2% of tokens overflowed to the API
+  (excludes on-call, upgrades, spare replicas, quality gap of an open model: the simple sum flatters self-hosting)

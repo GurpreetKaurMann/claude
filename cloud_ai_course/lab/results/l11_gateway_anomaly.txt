@@ -1,0 +1,19 @@
+A. SHOWBACK, days 0-44 (healthy), per feature
+feature          requests  cost/day  cost/1k req  resolve  cost per resolved
+triage-bot          3,987     26.70         6.70      70%             0.0574
+order-lookup        1,510      6.41         4.24      95%             0.0089
+refund-agent        9,190    113.79        12.38      45%             0.1651
+  (cost per resolved = cost per request x turns per conversation / resolve rate; turns assumed 6, 2 for lookups)
+
+B. THE BROKEN CACHE (triage-bot, day 45 on)
+  triage-bot cost/day: $27.02 before -> $48.07 after (1.8x)
+  cache-read share: 70% before -> 0% after
+  alert on daily cost (> trailing mean + 3 sigma) first fires on day: 45
+  alert on cache-read share (< trailing mean - 3 sigma) first fires on day: 45
+  false alarms in order-lookup before day 45 (cost rule): 0 of 30 days
+  false alarms in refund-agent before day 45 (cost rule): 0 of 30 days
+  extra spend if nobody notices for 30 days: $631
+
+C. CHECKPOINT STORAGE (arithmetic, notebook assumptions: 70B model, 16 bytes/param, $0.02/GB cross-AZ, $0.023/GB-month)
+  one full training-state checkpoint: 1,120 GB; cross-AZ transfer $22.40 each, $538/day if hourly
+  keep 48 hourly: 53.76 TB = $1,236/month; keep last 3: $77/month (94% less)

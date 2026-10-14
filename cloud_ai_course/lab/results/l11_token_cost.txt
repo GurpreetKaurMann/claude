@@ -1,0 +1,21 @@
+A. cost per 1M requests (3,000 cacheable + 1,000 uncached input, 400 output)
+  Opus 5.5    no cache $   24,000   cache hit $   12,600   cache write $   27,000
+  Sonnet 5.5  no cache $   12,000   cache hit $    6,300   cache write $   13,500
+  Haiku 5.5   no cache $      600   cache hit $      330   cache write $      675
+  Sonnet 5.5 batch + hit $3,150
+  Sonnet 5.5 at hit rate 50%: $9,900 per 1M
+  Sonnet 5.5 at hit rate 80%: $7,740 per 1M
+  Sonnet 5.5 at hit rate 95%: $6,660 per 1M
+  cache hit saves 47.5% vs no cache (Sonnet 5.5)
+  cascade Haiku first, 30% escalate to Sonnet (no cache): $4,200 per 1M (65% below all-Sonnet)
+  output 400 -> 250 tokens on Sonnet: saves $1,500 per 1M = 12.5% of the uncached bill
+
+B. MEASURED toy prefix cache, 5,000 requests of ~4,000 tokens
+  changing timestamp at the TOP of the system prompt: 0.0% of tokens served from cache
+  changing timestamp AFTER the cached prefix:         74.9% of tokens served from cache
+  input cost per 1M requests (Sonnet 5.5): top 8,000  vs after 2,304  (3.5x the bill)
+
+C. hit rate vs formula 1 - exp(-lambda*TTL), 5-minute TTL
+  1 request / minute       formula  99.3%   simulated  99.2%
+  1 request / 10 minutes   formula  39.3%   simulated  38.9%
+  1 request / hour         formula   8.0%   simulated   8.0%
