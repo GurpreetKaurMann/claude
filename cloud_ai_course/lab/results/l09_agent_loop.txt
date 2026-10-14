@@ -1,0 +1,5 @@
+the process dies just before the email step (step 8 of 9), then we recover (a tool error at step 1 is returned to the agent and handled)
+restart from step 1, no keys       tool calls in total: 14 · refunds issued: 2 · emails sent: 1
+restart from step 1, with keys     tool calls in total: 14 · refunds issued: 1 · emails sent: 1
+resume from checkpoint, no keys    tool calls in total:  8 · refunds issued: 1 · emails sent: 1
+resume from checkpoint, with keys  tool calls in total:  8 · refunds issued: 1 · emails sent: 1

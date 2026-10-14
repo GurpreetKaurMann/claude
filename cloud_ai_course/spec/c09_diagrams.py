@@ -1,0 +1,26 @@
+from cai_lib import bars, boxes, mini2
+
+DIAGRAMS = {
+'agentloop': boxes([('the model', 'picks a tool', 'teal'), ('your code', 'runs it', 'blue'), ('the result', 'goes back in', 'orange'), ('stop?', 'done, or budget hit', 'red')], [0, 1, 1, 2], y=50, h=180, arrows=True,
+                   note=('the loop repeats until the model is done or a limit stops it', 2, 'green')),
+'cost_growth': bars([('5 steps', 26, 'green', '26,000 tokens'), ('10 steps', 67, 'teal', '67,000 (2.6x)'), ('20 steps', 194, 'orange', '194,000 (7.5x)'), ('40 steps', 628, 'red', '628,000 (24.2x)')], [0, 0, 1, 1], 628,
+                    head=('agent length', 'input tokens billed in total (arithmetic, assumed sizes)'), x0=190, wmax=400, y0=50, dy=60, bh=42, note=('8 times the steps, 24 times the tokens', 1, 'red')),
+'cache_save': bars([('20-step agent, no cache', 100, 'red', '100'), ('20-step agent, cached', 14.5, 'green', '14.5'), ('100 calls, 50K prefix, no cache', 100, 'red', '100'), ('100 calls, 50K prefix, cached', 6.2, 'green', '6.2')], [0, 0, 1, 1], 100,
+                   head=('case', 'cost, no cache = 100 (arithmetic with example prices)'), x0=370, wmax=330, y0=50, dy=60, bh=42),
+'mcp': boxes([('the host', 'your LLM app', 'blue'), ('MCP client', 'one per server', 'teal'), ('MCP server', 'tools · resources · prompts', 'orange')], [0, 1, 1], y=50, h=190, arrows=True,
+             note=('MCP = agent to tools · A2A = agent to agent', 2, 'green')),
+'replay': boxes([('restart, no keys', '14 calls · 2 refunds', 'red'), ('restart + keys', '14 calls · 1 refund', 'orange'), ('resume from checkpoint', '8 calls · 1 refund', 'green')], [0, 0, 1], y=50, h=190, size=26,
+                note=('crash just before the email step', 1, 'blue')),
+'jitter_att': bars([('retry at once', 2010, 'red', '2,010 wasted'), ('exponential, no jitter', 2010, 'red', '2,010'), ('exponential, full jitter', 444, 'green', '444')], [0, 0, 1], 2010,
+                   head=('retry rule', 'rejected attempts, 200 clients, server takes 50 per second (simulation)'), x0=290, wmax=380, y0=50, dy=64, bh=42),
+'jitter_time': boxes([('retry at once', '140 clients gave up', 'red'), ('no jitter', 'last client at 211 s', 'orange'), ('full jitter', 'last client at 9.9 s', 'green')], [0, 0, 1], y=50, h=190, size=28,
+                     note=('random waits spread the retries out', 1, 'green')),
+'breaker': bars([('no breaker', 600, 'red', '600 calls to a dead backend'), ('circuit breaker', 7, 'green', '7')], [0, 1], 600,
+                head=('policy', 'calls that hit a backend that is down for 30 s (simulation)'), x0=230, wmax=330, y0=50, dy=72, bh=48, note=('fail fast while it is down', 1, 'green')),
+'states': boxes([('closed', 'normal: count failures', 'green'), ('open', 'fail fast, use a fallback', 'red'), ('half-open', 'after a cooldown, try one', 'orange')], [0, 0, 1], y=50, h=190, arrows=True,
+                note=('success closes it · failure opens it again', 1, 'blue')),
+'mini_thumb': mini2('restart, no keys', '2 refunds', 'red', 'resume + keys', '1 refund', 'green', 'after a crash at step 8'),
+'mini_replay': mini2('restart, no keys', '2 refunds', 'red', 'with an idempotency key', '1 refund', 'green', 'agent crash, simulated'),
+'mini_jitter': mini2('retry without jitter', '211 s', 'red', 'full jitter', '9.9 s', 'green', 'last of 200 clients, simulated'),
+'mini_loop': mini2('5 steps', '26K tokens', 'green', '40 steps', '628K tokens', 'red', '8x steps, 24x tokens'),
+}

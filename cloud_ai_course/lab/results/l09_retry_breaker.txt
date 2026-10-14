@@ -1,0 +1,7 @@
+== 1. 200 clients all call at second 0, server accepts 50 per second (assumed)
+retry rule                    total attempts  rejected (wasted)  last success at  gave up
+retry at once (every 0.1 s)             2070               2010             1.1s      140
+exponential, no jitter                  2070               2010           211.0s      140
+exponential, full jitter                 644                444             9.9s        0
+
+== 2. backend dead from second 10 to 40; 20 requests per second for 60 seconds

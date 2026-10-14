@@ -1,0 +1,12 @@
+== 1. input tokens billed by an agent that re-sends its history every step
+ steps  last step input  total input tokens  vs 5 steps
+     5            6,400              26,000        1.0x   (steps x 1, cost x 1.0)
+    10            9,400              67,000        2.6x   (steps x 2, cost x 2.6)
+    20           15,400             194,000        7.5x   (steps x 4, cost x 7.5)
+    40           27,400             628,000       24.2x   (steps x 8, cost x 24.2)
+
+== 2. the same 20-step agent, with and without prompt caching (cost per run, USD)
+no cache: $0.3880   cached: $0.0564   saving 85%   (assumes every step is within the cache lifetime)
+
+== 3. notebook example: 100 calls, a 50,000-token shared prefix
+no cache: $10.00   cached: $0.620   saving 94%

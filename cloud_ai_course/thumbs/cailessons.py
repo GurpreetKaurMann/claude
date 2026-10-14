@@ -5,6 +5,10 @@ L = {
  3: dict(lines=[('ONE LINE CHANGED', 'w'), ('401 MB SHIPPED', 'c'), ('THE DOCKER MISTAKE:', 'w'), ('LAYER ORDER', 'r')], icon='cube'),
  4: dict(lines=[('SMALL FILES ARE', 'w'), ('25X SLOWER', 'c'), ('THE AI DATA MISTAKE:', 'w'), ('SHARD IT', 'r')], icon='db'),
  5: dict(lines=[('70B MODEL: 140 GB', 'w'), ('TRAINING NEEDS', 'c'), ('THE 16-BYTE RULE:', 'w'), ('1,120 GB', 'r')], icon='chip'),
+ 6: dict(lines=[('YOUR LLM IS SLOW', 'w'), ('12X FASTER', 'c'), ('ONE TRICK:', 'w'), ('THE KV CACHE', 'r')], icon='chat'),
+ 7: dict(lines=[('BETTER SCORE', 'w'), ('WORSE PRODUCT', 'c'), ('THE EVAL GATE', 'w'), ('BLOCKED IT', 'r')], icon='shield'),
+ 8: dict(lines=[('RAG TESTED ON', 'w'), ('24 QUESTIONS', 'c'), ('THE FANCY FUSION:', 'w'), ('DID NOT WIN', 'r')], icon='search'),
+ 9: dict(lines=[('YOUR AGENT', 'w'), ('WILL CRASH', 'c'), ('THE DOUBLE REFUND:', 'w'), ('PREVENTABLE', 'r')], icon='nodes'),
 }
 
 # vertical covers: Shorts and the Instagram Reel (Reel key content stays inside the centre 1080x1350)
@@ -24,4 +28,16 @@ V = {
  5: [dict(id='s1', file='Short1_Cover', tag='SHORT', icon='chip', lines=[('140 GB', 'w'), ('MODEL', 'c'), ('1,120 GB', 'r')], sub='TO TRAIN IT'),
      dict(id='s2', file='Short2_Cover', tag='SHORT', icon='bolt', lines=[('TRAIN', 'w'), ('1%', 'c'), ('SAVE 100X', 'r')], sub='LORA, MEASURED'),
      dict(id='r1', file='Reel1_Cover_Instagram', tag='SAVE THIS', icon='pulse', lines=[('43%', 'w'), ('OF GPUS', 'c'), ('SIT IDLE', 'r')], sub='THE PIPELINE BUBBLE')],
+ 6: [dict(id='s1', file='Short1_Cover', tag='SHORT', icon='bolt', lines=[('64 WORDS', 'w'), ('12X FASTER', 'c'), ('ONE TRICK', 'r')], sub='THE KV CACHE, MEASURED'),
+     dict(id='s2', file='Short2_Cover', tag='SHORT', icon='layers', lines=[('SAME GPU', 'w'), ('3.7X', 'c'), ('THE OUTPUT', 'r')], sub='CONTINUOUS BATCHING'),
+     dict(id='r1', file='Reel1_Cover_Instagram', tag='SAVE THIS', icon='cube', lines=[('PLAIN 4-BIT', 'w'), ('BREAKS', 'c'), ('MODELS', 'r')], sub='51% ERROR, MEASURED')],
+ 7: [dict(id='s1', file='Short1_Cover', tag='SHORT', icon='shield', lines=[('SCORE UP', 'w'), ('GATE SAID', 'c'), ('NO', 'r')], sub='AVERAGES HIDE DAMAGE'),
+     dict(id='s2', file='Short2_Cover', tag='SHORT', icon='check', lines=[('90% RELIABLE', 'w'), ('PASSES 5', 'c'), ('ONLY 59%', 'r')], sub='ONE FORMULA'),
+     dict(id='r1', file='Reel1_Cover_Instagram', tag='SAVE THIS', icon='clock', lines=[('5% CANARY', 'w'), ('150 TO 9', 'c'), ('BAD', 'r')], sub='SMALL FIRST')],
+ 8: [dict(id='s1', file='Short1_Cover', tag='SHORT', icon='doc', lines=[('300 WORDS', 'w'), ('92%', 'c'), ('VS 79%', 'r')], sub='RAG CHUNK SIZE'),
+     dict(id='s2', file='Short2_Cover', tag='SHORT', icon='search', lines=[('HYBRID', 'w'), ('SEARCH', 'c'), ('DID NOT WIN', 'r')], sub='IN MY TEST'),
+     dict(id='r1', file='Reel1_Cover_Instagram', tag='SAVE THIS', icon='doc', lines=[('SKIP', 'w'), ('RAG?', 'c'), ('UNDER 200K', 'r')], sub='TOKENS: CACHE IT ALL')],
+ 9: [dict(id='s1', file='Short1_Cover', tag='SHORT', icon='nodes', lines=[('CRASH', 'w'), ('RESTART', 'c'), ('2 REFUNDS', 'r')], sub='AI AGENT, SIMULATED'),
+     dict(id='s2', file='Short2_Cover', tag='SHORT', icon='clock', lines=[('211 SECONDS', 'w'), ('TO 9.9', 'c'), ('ONE NUMBER', 'r')], sub='RETRY JITTER, SIMULATED'),
+     dict(id='r1', file='Reel1_Cover_Instagram', tag='SAVE THIS', icon='layers', lines=[('8X STEPS', 'w'), ('24X COST', 'c'), ('AGENT LOOPS', 'r')], sub='THEY RE-SEND EVERYTHING')],
 }

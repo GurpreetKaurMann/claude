@@ -1,0 +1,4 @@
+531 chunks of 100 words · titles found: ['Compute & Infrastructure', 'Containers & Orchestration', 'Cost & FinOps'] ...
+      method  plain hit@1  +title hit@1  plain hit@3  +title hit@3
+        BM25        62.5%         62.5%        83.3%         83.3%
+ dense (LSA)        62.5%         62.5%        83.3%         87.5%

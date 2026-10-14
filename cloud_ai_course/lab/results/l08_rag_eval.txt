@@ -1,0 +1,13 @@
+45,060 words · 24 questions · hit@k = share of questions with the answer phrase in the top k chunks
+ chunk size  chunks       method   hit@1   hit@3   hit@5
+     100 wd     531         BM25   62.5%   83.3%   87.5%
+     100 wd     531  dense (LSA)   62.5%   83.3%   95.8%
+     100 wd     531   hybrid RRF   58.3%   83.3%   91.7%
+     300 wd     177         BM25   62.5%   87.5%   91.7%
+     300 wd     177  dense (LSA)   66.7%   91.7%   95.8%
+     300 wd     177   hybrid RRF   62.5%   87.5%   91.7%
+     800 wd      67         BM25   58.3%   79.2%   91.7%
+     800 wd      67  dense (LSA)   66.7%   87.5%   87.5%
+     800 wd      67   hybrid RRF   58.3%   83.3%   87.5%
+
+300-word chunks, top 3: both found it 21 · only BM25 0 · only dense 1 · neither 2   (24 questions, each worth 4.2 points)
