@@ -422,7 +422,7 @@ Self-hosting beats APIs only at sustained high utilization and volume, or when d
 - **Effective-price stacking (derived from Anthropic figures):** for an agent loop on Opus 5.5 with a 50K-token stable prefix and 2K new tokens per turn:
   - Uncached input per turn: 52K × $4/MTok ≈ $0.208.
   - Cached: 50K × $0.20 + 2K × $4 ≈ $0.018, about **11× cheaper on input**.
-  - Batch halves base rates further. Whether caching multipliers apply on top of batch pricing (Anthropic documents that they do stack) was not re-verified this session; Vertex says its batch and cache discounts *don't* stack.
+  - Batch halves base rates further. Whether caching multipliers apply on top of batch pricing was not verified this session. My background knowledge is that Anthropic's docs have said they stack. Vertex reportedly says its batch and cache discounts *don't* stack.
 - **Self-host cost-per-token formula (illustrative; assumptions are mine, not sourced):** $/MTok = (node $/hr) ÷ (sustained tok/s × 3,600 × utilization) × 10⁶.
   - An 8-GPU node at an assumed $25/hr sustaining 20,000 output tok/s at 50% average utilization gives 36M tok/hr and about **$0.69/MTok**.
   - At 15% utilization (spiky internal traffic) it is about $2.30/MTok, which is above several hosted open-model prices.
