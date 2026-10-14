@@ -1,0 +1,18 @@
+== 1. weights = parameters x bytes per parameter (GB, decimal)
+model      BF16      FP8      FP4
+8B           16        8        4
+70B         140       70       35
+405B        810      405      202
+
+== 2. KV cache = 2 x layers x kv_heads x head_dim x bytes, per token
+assumed 8B-class   BF16    131,072 bytes/token   8,192-token chat =  1.07 GB   32 chats =   34.4 GB
+assumed 8B-class   FP8      65,536 bytes/token   8,192-token chat =  0.54 GB   32 chats =   17.2 GB
+assumed 70B-class  BF16    327,680 bytes/token   8,192-token chat =  2.68 GB   32 chats =   85.9 GB
+assumed 70B-class  FP8     163,840 bytes/token   8,192-token chat =  1.34 GB   32 chats =   42.9 GB
+
+== 3. does 70B fit? weights + 32 chats of 8,192 tokens (BF16 KV), 20% headroom
+70B FP8 weights 70 GB + KV 85.9 GB, with headroom = 187 GB
+  H100 80 GB   does NOT fit   (234% of memory)
+  H200 141 GB  does NOT fit   (133% of memory)
+  B200 192 GB  fits           (97% of memory)
+  B300 288 GB  fits           (65% of memory)

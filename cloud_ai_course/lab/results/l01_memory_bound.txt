@@ -1,0 +1,26 @@
+== 1. memory read speed (sum of a 512 MB float32 array)
+read 537 MB in 76 ms  =  7.1 GB/s
+
+== 2. one token = matrix x vector. time follows the bytes read
+      matrix      MB      ms    GB/s  GFLOP/s
+  1024x1024        4    0.15    27.3     13.6
+  2048x2048       17    0.62    27.2     13.6
+  4096x4096       67    2.43    27.6     13.8
+  8192x8192      268   20.35    13.2      6.6
+
+== 3. batching: 4096x4096 matrix, serve B tokens at once (matrix x matrix)
+ batch       ms   tokens/s   GFLOP/s  vs batch 1
+     1     2.58        387      13.0       1.00x
+     2     6.08        329      11.0       2.35x
+     4     6.16        649      21.8       2.38x
+     8     6.87       1165      39.1       2.66x
+    16     7.80       2053      68.9       3.02x
+    32    11.19       2861      96.0       4.33x
+    64    18.86       3393     113.9       7.30x
+   128    34.22       3741     125.5      13.24x
+   256    61.24       4180     140.3      23.70x
+
+== 4. ARITHMETIC (vendor specs, not measured): decode step floor = weight bytes / memory bandwidth
+70B in FP8 (70 GB), batch 1, H100 3.4 TB/s: >=  20.6 ms/token  (<=  49 tokens/s)
+70B in FP8 (70 GB), batch 1, H200 4.8 TB/s: >=  14.6 ms/token  (<=  69 tokens/s)
+70B in FP8 (70 GB), batch 1, B200 8.0 TB/s: >=   8.8 ms/token  (<= 114 tokens/s)
