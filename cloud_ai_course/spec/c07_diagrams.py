@@ -1,0 +1,26 @@
+from cai_lib import bars, boxes, mini2
+
+DIAGRAMS = {
+'levels': boxes([('level 0', 'by hand: notebooks', 'red'), ('level 1', 'automate the TRAINING', 'orange'), ('level 2', 'automate shipping the automation', 'green')], [0, 1, 2], y=50, h=190, arrows=True,
+                note=('0 = by hand · 1 = continuous training · 2 = CI/CD of the pipeline', 2, 'blue')),
+'loop': boxes([('build', 'change a prompt or model', 'blue'), ('eval gate', 'score the whole test set', 'teal'), ('canary', 'a little traffic first', 'orange'), ('watch', 'traces + online judges', 'green')], [0, 1, 2, 2], y=50, h=180, arrows=True,
+              note=('every production failure becomes a new test case', 2, 'red')),
+'layers': boxes([('code tests', 'unit + integration', 'blue'), ('data + model tests', 'loss falls, no NaNs', 'teal'), ('LLM evals', 'graders on a golden set', 'orange')], [0, 1, 2], y=50, h=190,
+                note=('each layer catches a different break', 2, 'green')),
+'gate': boxes([('delivery', '86.7% to 100%', 'green'), ('refund', '100% to 50%', 'red'), ('overall', '90% to 92%', 'teal')], [0, 1, 1], y=50, h=190, size=30,
+              note=('the average went UP and the gate still said no', 2, 'red')),
+'trials': bars([('1 run', 90, 'green', '90%'), ('all 3 runs', 72.9, 'teal', '72.9%'), ('all 5 runs', 59.0, 'orange', '59.0%'), ('all 10 runs', 34.9, 'red', '34.9%')], [0, 0, 1, 1], 100,
+               head=('success needed', 'chance a 90%-reliable agent passes every run (formula, checked by simulation)'), x0=230, wmax=520, y0=50, dy=60, bh=42, note=('reliability falls quickly with repeats', 1, 'red')),
+'canary_bad': bars([('1% canary', 4.1, 'green', '4.1 bad responses'), ('5% canary', 9.4, 'green', '9.4'), ('25% canary', 37.7, 'orange', '37.7'), ('100% at once', 149.6, 'red', '149.6')], [0, 0, 1, 1], 150,
+                   head=('first release to', 'bad responses before the rollback (simulation)'), x0=240, wmax=420, y0=50, dy=60, bh=42),
+'canary_first': bars([('1% canary', 45, 'red', '45%'), ('5% canary', 77, 'orange', '77%'), ('25% canary', 100, 'green', '100%'), ('100% at once', 100, 'green', '100%')], [0, 0, 1, 1], 100,
+                     head=('first release to', 'how often the FIRST check catches the bad release'), x0=240, wmax=420, y0=50, dy=60, bh=42, note=('a tiny canary is safe but slow to prove anything', 1, 'blue')),
+'iac': boxes([('Terraform / OpenTofu', 'cloud + GPU pools', 'blue'), ('GitOps', 'Argo CD / Flux', 'teal'), ('Rollouts', 'canary + rollback', 'orange')], [0, 0, 1], y=50, h=190, arrows=True,
+             note=('git is the source of truth: rollback = git revert', 1, 'green')),
+'alias': boxes([('version 1', 'never edited', 'gray'), ('version 2', 'never edited', 'gray'), ('version 3', 'never edited', 'gray'), ('alias "prod"', 'points at one version', 'red')], [0, 0, 1, 1], y=50, h=170, size=26,
+               note=('a rollback is moving the alias, no redeploy', 1, 'green')),
+'mini_thumb': mini2('overall score', '+2 pts', 'green', 'refund tickets', '-50 pts', 'red', 'the eval gate said no'),
+'mini_gate': mini2('overall score', '90 to 92%', 'green', 'refund slice', '100 to 50%', 'red', 'a "better" prompt, blocked'),
+'mini_trials': mini2('succeeds one run', '90%', 'green', 'succeeds all 5 runs', '59%', 'red', 'a 90%-reliable agent'),
+'mini_canary': mini2('100% rollout', '150 bad', 'red', '5% canary', '9 bad', 'green', 'bad responses before rollback'),
+}

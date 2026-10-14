@@ -1,0 +1,8 @@
+ alpha  gamma  simulated   formula  speedup (c=0.05)
+  0.50      3       1.88      1.88             1.63x
+  0.60      5       2.38      2.38             1.91x
+  0.70      5       2.95      2.94             2.35x
+  0.80      5       3.69      3.69             2.95x
+  0.90      5       4.69      4.69             3.75x
+  0.55      5       2.16      2.16             1.73x
+speedup below 1.0x = the draft costs more than it saves

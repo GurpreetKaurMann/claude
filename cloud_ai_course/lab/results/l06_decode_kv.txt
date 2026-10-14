@@ -1,0 +1,15 @@
+model: 16.8M parameters, 6 layers, 384 wide (random weights, speed test only)
+
+== 1. prefill: time to process the prompt (the wait for the first word)
+ prompt tokens  prefill ms  ms per token
+            64        22.6          0.35
+           256        62.8          0.25
+          1024       266.6          0.26
+
+== 2. generate 64 tokens after a 256-token prompt
+with KV cache:      0.35 s total  (181.8 tokens/s)
+without a cache:    4.25 s total  ( 15.1 tokens/s)   -> 12.1x slower
+one decode step with the cache: 4.7 ms (context about 276 tokens)
+
+== 3. KV cache size, measured from the real tensors (256-token prompt)
+real tensors: 4,718,592 bytes = 18,432 bytes per token   formula 2 x 6 x 6 x 64 x 4 = 18,432 bytes per token

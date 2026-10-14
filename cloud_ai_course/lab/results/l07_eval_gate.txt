@@ -1,0 +1,9 @@
+100 synthetic tickets · version 1 = baseline · version 2 = the proposed change (adds the word "order" to delivery)
+                v1      v2   change
+delivery     86.7%  100.0%   +13.3
+refund      100.0%   50.0%   -50.0
+account     100.0%  100.0%    +0.0
+product      85.7%   85.7%    +0.0
+OVERALL      90.0%   92.0%    +2.0
+
+GATE: BLOCKED: refund dropped 50.0 points

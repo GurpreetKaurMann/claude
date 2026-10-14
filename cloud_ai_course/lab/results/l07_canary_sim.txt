@@ -1,0 +1,5 @@
+ canary share  caught at 1st check  mean checks  bad responses before rollback requests on new version
+          1%                 45%         2.71                            4.1                      81
+          5%                 77%         1.25                            9.4                     188
+         25%                100%         1.00                           37.7                     750
+        100%                100%         1.00                          149.6                    3000

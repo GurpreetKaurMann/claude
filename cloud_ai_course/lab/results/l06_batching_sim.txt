@@ -1,0 +1,4 @@
+2000 requests, mean 119 output tokens (max 600), 32 slots, 25 ms per step (assumed)
+policy        total time  tokens/s  mean finish  slowest finish
+static              710s       335         366s            710s
+continuous          192s      1243          95s            192s

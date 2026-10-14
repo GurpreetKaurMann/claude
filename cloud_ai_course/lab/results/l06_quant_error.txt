@@ -1,0 +1,9 @@
+format                              bytes/weight  relative error
+bf16-like (16 bit)                          2.00         0.00021   (float16 stands in for bf16)
+int8, one scale for the whole matrix          1.00         0.08439
+int8, one scale per row                     1.00         0.04185
+int8, groups of 64                          1.06         0.01414
+int4, one scale for the whole matrix          0.50         0.51412
+int4, one scale per row                     0.50         0.47524
+int4, groups of 64                          0.56         0.18954
+(groups add 4 bytes of scale per 64 weights)
