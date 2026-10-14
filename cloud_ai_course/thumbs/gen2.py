@@ -32,7 +32,7 @@ CSS = '''
 .foot b{color:#1FE6F2;font-weight:800}
 .face{position:absolute;left:998px;top:430px;width:214px;height:214px;border-radius:50%;border:7px solid #fff;overflow:hidden;z-index:4;
  background:#E6F3FF;box-shadow:0 0 0 5px #1FA9F2,0 0 34px 8px rgba(31,169,242,.7)}
-.face img{position:absolute;left:-2%;top:3%;width:104%}
+.face img{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;object-position:52% 28%;transform:scale(1.6);transform-origin:53% 40%}
 .brand{position:absolute;left:1105px;top:628px;transform:translateX(-50%);height:50px;padding:0 26px;border-radius:25px;background:#05143a;
  border:3px solid #1FA9F2;color:#fff;font-weight:800;font-size:25px;letter-spacing:.5px;display:flex;align-items:center;z-index:5;white-space:nowrap;
  box-shadow:0 0 22px rgba(31,169,242,.65)}
@@ -43,7 +43,7 @@ def thumb(num, d):
     for text, k in d['lines']:
         h += (f'<div class="ln" data-fit style="color:{COL[k]};text-shadow:0 7px 0 rgba(0,0,0,.38),0 0 34px {GLOW[k]}">{text}</div>')
     h += f'<div class="foot">CLOUD FOR AI ENGINEERS &nbsp;<b>LESSON {num}</b></div>'
-    h += f'<div class="face"><img src="data:image/png;base64,{b64(D + "/face_cut.png")}"></div><div class="brand">THE CODE NOTEBOOK</div></div>'
+    h += f'<div class="face"><img src="data:image/jpeg;base64,{b64(D + "/face_new.jpg")}"></div><div class="brand">THE CODE NOTEBOOK</div></div>'
     return h
 
 # target widths per line index, then stack; shrink everything if the block would be too tall
@@ -77,7 +77,7 @@ def vthumb(n, d):
     for text, k in d['lines']:
         h += f'<div class="ln" data-fit style="color:{COL[k]};text-shadow:0 8px 0 rgba(0,0,0,.38),0 0 40px {GLOW[k]}">{text}</div>'
     h += f'<div class="sub">{d["sub"]}</div>'
-    h += f'<div class="face"><img src="data:image/png;base64,{b64(D + "/face_cut.png")}"></div><div class="brand">THE CODE NOTEBOOK</div>'
+    h += f'<div class="face"><img src="data:image/jpeg;base64,{b64(D + "/face_new.jpg")}"></div><div class="brand">THE CODE NOTEBOOK</div>'
     h += f'<div class="foot">CLOUD FOR AI ENGINEERS &nbsp;<b>LESSON {n}</b></div></div>'
     return h
 
