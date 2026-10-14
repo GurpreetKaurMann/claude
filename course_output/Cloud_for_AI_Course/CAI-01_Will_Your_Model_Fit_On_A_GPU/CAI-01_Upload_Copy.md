@@ -2,12 +2,12 @@
 
 ## 1. Lesson video (YouTube)
 
-**Title:** Will Your Model Fit on a GPU? The 70B Model That Fits, Then Fails | Cloud for AI Engineers 1
+**Title:** Why Your AI Model Fits on the GPU, Then Crashes (The 187 GB Trap)
 
 **Description:**
 ```
-A 70 billion parameter model fits on one H100. Then 32 people start chatting and you need 187 GB. This lesson explains why, and gives you the sum.
-Lesson 1 of Cloud for AI Engineers. We learn the four numbers on every GPU spec sheet (memory size, memory speed, compute, connection), turn parameters into gigabytes, meet the KV cache, and measure why chat speed is set by memory speed. Chip specs are vendor figures from October 2026, the sums are labelled arithmetic, and the CPU tests are measured by me.
+Lesson 1 of Cloud for AI Engineers. A 70 billion parameter model fits on one H100. Then 32 people start chatting and you need 187 GB. This lesson explains why, and gives you the sum.
+We learn the four numbers on every GPU spec sheet (memory size, memory speed, compute, connection), turn parameters into gigabytes, meet the KV cache, and measure why chat speed is set by memory speed. Chip specs are vendor figures from October 2026, the sums are labelled arithmetic, and the CPU tests are measured by me.
 
 In this lesson:
 ✅ The four numbers on every GPU spec sheet
@@ -174,3 +174,7 @@ Lesson 2 next: which GPU to rent, what it costs, and how spot machines cut the b
 **Cover:** CAI-01_Reel1_Cover_Instagram.png
 
 ---
+
+## 5. Code for this lesson
+
+`CAI-01_Code.zip` — upload it to the lesson page on thecodenotebook.com and link it in the description.
