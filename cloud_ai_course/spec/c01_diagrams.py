@@ -101,8 +101,8 @@ DIAGRAMS = {
 'mini_fit': r'''
  d.box(40,40,300,70,null,{stroke:'#0f766e',fill:'#ccfbf1',fillStyle:'solid'}); d.text(190,88,'weights 70',{size:34,color:'#0f766e',font:'P'});
  d.box(340,40,369,70,null,{stroke:'#dc2626',fill:'#fee2e2',fillStyle:'solid'}); d.text(525,88,'32 chats 86',{size:34,color:'#dc2626',font:'P'});
- d.line(383,25,383,140,{sw:5,stroke:'#1e2440'}); d.text(383,172,'H100 = 80 GB',{size:32,color:'#1e2440',font:'P'});
- d.text(560,205,'187 GB needed',{size:44,color:'#1e2440',font:'P'});
+ d.line(383,25,383,140,{sw:5,stroke:'#1e2440'}); d.text(383,168,'H100 = 80 GB',{size:32,color:'#1e2440',font:'P'});
+ d.text(380,240,'187 GB needed',{size:44,color:'#dc2626',font:'P'});
 ''',
 'mini_mem': r'''
  d.text(40,75,'67 MB matrix',{size:36,color:'#6b7280',font:'P',anchor:'start'}); d.text(720,75,'2.4 ms',{size:52,color:'#0f766e',font:'P',anchor:'end'});
