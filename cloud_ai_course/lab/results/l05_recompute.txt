@@ -1,0 +1,7 @@
+setting                   seconds / step  peak memory MB
+fixed costs only (no pass)           0.000             928
+keep all activations               5.551            1721
+recompute per block                6.900            1354
+
+activation memory = peak - fixed costs: 793 MB kept vs 426 MB recomputed  (0.54x)
+whole-process peak: 0.79x the memory, 1.24x the time  (notebook rule of thumb: about +33% compute)

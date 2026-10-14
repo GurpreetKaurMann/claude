@@ -1,0 +1,25 @@
+from cai_lib import bars, boxes, mini2
+
+DIAGRAMS = {
+'owners': boxes([('the host', 'GPU driver (libcuda)', 'orange'), ('the toolkit', 'the bridge, at start', 'teal'), ('your image', 'CUDA libs + your code', 'blue')], [0, 1, 2],
+                y=50, h=190, arrows=True, note=('the driver can never live inside the image', 2, 'red')),
+'layers': boxes([('OS', '50 MB', 'gray'), ('CUDA', '100 MB', 'gray'), ('Python deps', '60 MB', 'gray'), ('weights', '400 MB', 'red'), ('code', '1 MB', 'teal')], [0, 0, 1, 1, 2],
+                y=40, h=170, arrows=True, size=26, note=('change one layer: every layer to its right is made again', 2, 'orange')),
+'ship_code': bars([('A: code last', 1, 'green', '1 MB'), ('B: code before weights', 401, 'red', '401 MB'), ('C: weights mounted', 1, 'green', '1 MB')], [0, 1, 2], 401,
+                  head=('image layout', 'MB shipped again after a one-line code change'), x0=330, wmax=520, y0=50, dy=70, bh=46),
+'ship_weights': bars([('A: weights baked in', 401, 'red', '401 MB'), ('B: weights baked in', 400, 'red', '400 MB'), ('C: weights mounted', 0.5, 'green', '0 MB in the image')], [0, 1, 2], 401,
+                     head=('image layout', 'MB shipped when the MODEL changes'), x0=330, wmax=470, y0=50, dy=70, bh=46),
+'k8s': boxes([('a cluster', 'many machines', 'blue'), ('scheduler', 'picks a machine', 'teal'), ('a node', 'one GPU machine', 'orange'), ('a pod', 'your container', 'green')], [0, 0, 1, 1],
+             y=50, h=180, arrows=True, note=('the head chef assigns each dish to a cook', 1, 'orange')),
+'sharing': boxes([('MIG', 'walls: separate rooms', 'green'), ('MPS', 'desks in one room', 'blue'), ('time-slicing', 'turns on one chair', 'orange')], [0, 1, 2], y=50, h=190,
+                 note=('only walls stop a crash next door', 2, 'red')),
+'gang': bars([('2 jobs', 0.4, 'green', '0%'), ('3 jobs', 94.8, 'red', '94.8%'), ('4 jobs', 100, 'red', '100%'), ('6 jobs', 100, 'red', '100%')], [0, 1, 1, 2], 100,
+             head=('jobs submitted', 'share of runs that deadlock (gang scheduler: 0%)'), x0=210, wmax=560, y0=50, dy=60, bh=42,
+             note=('16 GPUs, each job needs 8 at once', 2, 'orange')),
+'tools': boxes([('Kueue', 'WHEN a job starts + quota', 'teal'), ('scheduler', 'WHERE pods go', 'blue'), ('JobSet / Ray', 'the job itself', 'orange')], [0, 1, 2], y=50, h=190, arrows=True,
+               note=('queue first, place second', 2, 'green')),
+'mini_thumb': mini2('one-line fix, bad layers', '401 MB', 'red', 'one-line fix, good layers', '1 MB', 'green', 'shipped again (real bytes)'),
+'mini_layers': mini2('code last', '1 MB', 'green', 'code before weights', '401 MB', 'red', 'after a one-line change'),
+'mini_gang': mini2('default scheduler', '94.8%', 'red', 'gang scheduler', '0%', 'green', '3 jobs on 16 GPUs: deadlocked'),
+'mini_mount': mini2('new code', '1 MB', 'green', 'new model, mounted', '0 MB', 'green', 'shipped in the app image'),
+}

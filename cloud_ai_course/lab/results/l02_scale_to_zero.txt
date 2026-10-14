@@ -1,0 +1,4 @@
+policy            GPU-hours/day  mean wait s  p95 wait s  max wait s  cold starts/day  wait when cold s
+always on                 24.00         1.71        7.90       39.10             0.00              0.00
+scale to zero              4.04         2.31        8.86       80.42             3.86             60.00
+(one warm GPU bills like always on, and also waits like always on)

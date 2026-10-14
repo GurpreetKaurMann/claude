@@ -1,0 +1,7 @@
+image layout                        first push  change code  new weights
+A: weights baked in, code last           611 MB          1 MB        401 MB
+B: weights baked in, code BEFORE weights       611 MB        401 MB        400 MB
+C: weights mounted, not in the image       211 MB          1 MB          0 MB
+(C: a new weights version ships as its own 400 MB artifact, the app image is untouched)
+
+real work: hashing the 400 MB weights layer took 0.33 s on this machine (1225 MB/s)

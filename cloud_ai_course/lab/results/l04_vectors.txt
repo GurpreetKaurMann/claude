@@ -1,0 +1,18 @@
+50,000 vectors x 768 dims (synthetic) · exact search: 1.21 ms per query, float32 = 153.6 MB
+
+== 1. storage formats (exact search on the compressed copy)
+format      bytes/vector  total MB  smaller  recall@10
+float32             3072     153.6       1x      1.000
+float16             1536      76.8       2x      1.000
+int8                 768      38.4       4x      0.985
+binary                96       4.8      32x      0.212   (top-10 by Hamming only)
+binary+rescore            96       4.8      32x      0.741   (top-100 by Hamming, rescored with float32)
+
+== 2. graph index (HNSW, hnswlib, M=16, efConstruction=100), recall vs effort
+build 16.8 s · index on disk 161.0 MB · formula N x (4d + 8M) = 160.0 MB
+ ef (effort)  recall@10  ms/query  vs exact
+          10      0.563     0.118       10x
+          20      0.787     0.147        8x
+          50      0.963     0.196        6x
+         100      0.998     0.241        5x
+         200      1.000     0.341        4x

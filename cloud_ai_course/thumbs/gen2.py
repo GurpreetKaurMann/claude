@@ -73,7 +73,7 @@ VCSS = CSS + '''
 '''
 
 def vthumb(n, d):
-    h = f'<div class="v" id="v{d["id"]}"><div class="tag">{d["tag"]}</div><div class="vic">{icon(d["icon"])}</div>'
+    h = f'<div class="v" id="v{n}_{d["id"]}"><div class="tag">{d["tag"]}</div><div class="vic">{icon(d["icon"])}</div>'
     for text, k in d['lines']:
         h += f'<div class="ln" data-fit style="color:{COL[k]};text-shadow:0 8px 0 rgba(0,0,0,.38),0 0 40px {GLOW[k]}">{text}</div>'
     h += f'<div class="sub">{d["sub"]}</div>'
@@ -98,7 +98,7 @@ async def vmain(V, outdir):
         b = await pw.chromium.launch(); pg = await b.new_page(viewport={'width': 1080, 'height': 1920})
         await pg.goto(f'file://{D}/v2.html'); await pg.evaluate('document.fonts.ready'); await pg.wait_for_timeout(400)
         await pg.evaluate(VLAYOUT)
-        for n, d in V: await pg.locator('#v' + d['id']).screenshot(path=f'{outdir}/CAI-{n:02d}_{d["file"]}.png')
+        for n, d in V: await pg.locator(f'#v{n}_{d["id"]}').screenshot(path=f'{outdir}/CAI-{n:02d}_{d["file"]}.png')
         await b.close()
 
 async def main(L, nums, outdir):

@@ -1,0 +1,22 @@
+== 1. MEASURED: 33,574,912 parameters, one Adam step, float32
+weights    134,299,648 bytes  = 4.0 bytes per parameter
+gradients  134,299,648 bytes  = 4.0 bytes per parameter
+Adam m+v   268,599,296 bytes  = 8.0 bytes per parameter
+total      537,198,592 bytes  = 16.0 bytes per parameter
+
+== 2. ARITHMETIC: mixed precision on GPUs = 2 + 2 + (4 + 4 + 4) = 16 bytes per parameter
+model   training state
+7B              112 GB
+70B           1,120 GB
+405B          6,480 GB
+
+== 3. ARITHMETIC: per-GPU bytes with sharding (N = GPUs sharing the state; K = 12 for Adam)
+method            7B, 8 GPUs  70B, 64 GPUs
+DDP (nothing)        112.0GB      1120.0GB
+ZeRO-1                38.5GB       293.1GB
+ZeRO-2                26.2GB       155.3GB
+ZeRO-3 / FSDP         14.0GB        17.5GB
+
+== 4. MEASURED: LoRA. Freeze the model, train two small matrices per layer (rank r) instead
+rank  8: trains 327,680 of 33,902,592 parameters = 0.97% · Adam state 2.6 MB vs 268.6 MB for full training
+rank 16: trains 655,360 of 34,230,272 parameters = 1.91% · Adam state 5.2 MB vs 268.6 MB for full training

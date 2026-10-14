@@ -1,0 +1,17 @@
+== checkpoint size = 14 bytes x parameters
+8B      0.11 TB
+70B     0.98 TB
+405B    5.67 TB
+
+== stall seconds if training waits for the write (size / bandwidth, ASSUMED speeds)
+model   size TB   10 GB/s  100 GB/s
+70B        0.98       98s       10s
+405B       5.67      567s       57s
+
+== dataset read once: tokens x bytes per token (uint16 ids = 2 bytes, vocab <= 65,536)
+15T tokens x 2 B = 30 TB
+
+== egress at the ~$0.09 per GB list price
+   1 TB out =   1,000 GB x $0.09 = $       90
+  10 TB out =  10,000 GB x $0.09 = $      900
+ 100 TB out = 100,000 GB x $0.09 = $    9,000

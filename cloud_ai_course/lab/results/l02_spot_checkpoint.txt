@@ -1,0 +1,13 @@
+job = 100 h of work, mean time between interruptions = 8 h (assumed)
+  checkpoint every  mean hours  vs no loss  spot cost  vs on-demand
+never (only at end)   2203564.1   22035.64x   661069.2      6610.69x
+               8 h       172.4       1.72x       51.7         0.52x
+               2 h       116.3       1.16x       34.9         0.35x
+            30 min       108.8       1.09x       32.6         0.33x
+    34 min (Young)       108.8       1.09x       32.6         0.33x
+            10 min       114.7       1.15x       34.4         0.34x
+             2 min       162.6       1.63x       48.8         0.49x
+              30 s       344.8       3.45x      103.5         1.03x
+
+Young/Daly rule of thumb: interval ≈ sqrt(2 x MTBF x checkpoint cost) = 0.566 h = 34 min
+on-demand, no interruptions: 100.0 h at 1.00 = 100.0

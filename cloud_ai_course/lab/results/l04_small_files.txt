@@ -1,0 +1,6 @@
+== 1. MEASURED: reading 80 MB from local disk
+layout                   files   seconds     MB/s   vs one file
+4 KB files               20000     1.337       60         25.1x
+1 MB files                  80     0.079     1014          1.5x
+one 80 MB shard              1     0.053     1499          1.0x
+page cache dropped before each read: True

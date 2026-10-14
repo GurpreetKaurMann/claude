@@ -1,0 +1,8 @@
+ host driver  CUDA 12.x  CUDA 13.x
+        R515         NO         NO
+        R525       runs         NO
+        R535       runs         NO
+        R550       runs         NO
+        R570       runs         NO
+        R580       runs       runs
+        R595       runs       runs
