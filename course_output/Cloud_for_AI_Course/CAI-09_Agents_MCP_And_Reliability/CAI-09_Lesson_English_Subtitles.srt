@@ -1,0 +1,1832 @@
+1
+00:00:00,500 --> 00:00:04,385
+I built a small agent that refunds a customer and then emails
+
+2
+00:00:04,385 --> 00:00:07,375
+them. I crashed it just before the email step,
+
+3
+00:00:07,375 --> 00:00:09,407
+and restarted it from scratch.
+
+4
+00:00:09,407 --> 00:00:11,559
+The customer was refunded twice.
+
+5
+00:00:11,559 --> 00:00:13,712
+Resumed from a saved checkpoint,
+
+6
+00:00:13,712 --> 00:00:14,250
+once.
+
+7
+00:00:14,600 --> 00:00:17,396
+That is one of three failures in this lesson.
+
+8
+00:00:17,396 --> 00:00:19,221
+The second is a retry storm,
+
+9
+00:00:19,221 --> 00:00:22,816
+where a simple fix cut the finish time from two hundred and
+
+10
+00:00:22,816 --> 00:00:24,300
+eleven seconds to ten.
+
+11
+00:00:24,300 --> 00:00:26,012
+The third is a cost curve,
+
+12
+00:00:26,012 --> 00:00:29,778
+where eight times the steps cost twenty-four times the tokens.
+
+13
+00:00:31,028 --> 00:00:34,468
+Welcome to lesson nine of the cloud for A I engineers course,
+
+14
+00:00:34,468 --> 00:00:35,792
+on The Code Notebook.
+
+15
+00:00:36,142 --> 00:00:39,276
+The handwritten notes and the code for this lesson are linked in
+
+16
+00:00:39,276 --> 00:00:40,198
+the description.
+
+17
+00:00:41,448 --> 00:00:43,189
+Lesson eight built R A G,
+
+18
+00:00:43,189 --> 00:00:46,371
+one of the two big patterns for A I applications.
+
+19
+00:00:46,371 --> 00:00:48,593
+This lesson covers the other one,
+
+20
+00:00:48,593 --> 00:00:49,793
+agents. That is,
+
+21
+00:00:49,793 --> 00:00:52,255
+a model that decides what to do next,
+
+22
+00:00:52,255 --> 00:00:53,216
+calls tools,
+
+23
+00:00:53,216 --> 00:00:55,317
+and loops until a task is done.
+
+24
+00:00:55,667 --> 00:00:56,501
+As always,
+
+25
+00:00:56,501 --> 00:00:58,109
+I label my experiments.
+
+26
+00:00:58,109 --> 00:01:01,563
+The agent loop uses a scripted stand in for the model,
+
+27
+00:01:01,563 --> 00:01:03,588
+with no language model called.
+
+28
+00:01:03,588 --> 00:01:07,817
+The retry and breaker results are simulations with assumed numbers.
+
+29
+00:01:07,817 --> 00:01:11,033
+The token costs are arithmetic with assumed sizes.
+
+30
+00:01:12,283 --> 00:01:13,500
+What is an agent?
+
+31
+00:01:13,500 --> 00:01:16,225
+A language model that uses tools in a loop,
+
+32
+00:01:16,225 --> 00:01:18,312
+with memory and stop conditions.
+
+33
+00:01:18,312 --> 00:01:20,574
+The classic recipe is called react.
+
+34
+00:01:20,574 --> 00:01:21,791
+The model thinks,
+
+35
+00:01:21,791 --> 00:01:23,646
+then acts by calling a tool,
+
+36
+00:01:23,646 --> 00:01:25,328
+then observes the result,
+
+37
+00:01:25,328 --> 00:01:26,255
+and repeats.
+
+38
+00:01:26,605 --> 00:01:27,937
+A chat answers once.
+
+39
+00:01:27,937 --> 00:01:29,323
+An agent keeps going.
+
+40
+00:01:29,323 --> 00:01:30,433
+It might search,
+
+41
+00:01:30,433 --> 00:01:31,320
+read a file,
+
+42
+00:01:31,320 --> 00:01:32,319
+call an A P I,
+
+43
+00:01:32,319 --> 00:01:33,483
+check the result,
+
+44
+00:01:33,483 --> 00:01:34,482
+and try again,
+
+45
+00:01:34,482 --> 00:01:37,699
+until it decides it is finished or something stops it.
+
+46
+00:01:38,949 --> 00:01:40,888
+Here is the loop in a few lines.
+
+47
+00:01:40,888 --> 00:01:42,342
+The model picks a tool,
+
+48
+00:01:42,342 --> 00:01:43,526
+your code runs it,
+
+49
+00:01:43,526 --> 00:01:45,250
+and the result goes back in.
+
+50
+00:01:45,250 --> 00:01:46,596
+Then comes the check.
+
+51
+00:01:46,596 --> 00:01:47,781
+Is the model done,
+
+52
+00:01:47,781 --> 00:01:49,289
+or has a limit been hit?
+
+53
+00:01:49,639 --> 00:01:52,071
+The model never runs anything itself.
+
+54
+00:01:52,071 --> 00:01:55,216
+It writes a tool name and some J S O N arguments.
+
+55
+00:01:55,216 --> 00:01:56,877
+Your code does the work,
+
+56
+00:01:56,877 --> 00:01:57,886
+in a sandbox,
+
+57
+00:01:57,886 --> 00:01:59,013
+with a timeout.
+
+58
+00:01:59,363 --> 00:02:01,759
+And there are always two stop conditions.
+
+59
+00:02:01,759 --> 00:02:03,569
+The model says it is finished,
+
+60
+00:02:03,569 --> 00:02:05,272
+or the step budget runs out,
+
+61
+00:02:05,272 --> 00:02:07,082
+in which case you fail loudly,
+
+62
+00:02:07,082 --> 00:02:07,933
+not quietly.
+
+63
+00:02:09,183 --> 00:02:11,280
+Tools matter more than prompts.
+
+64
+00:02:11,280 --> 00:02:14,995
+Describe each tool like documentation for a new colleague,
+
+65
+00:02:14,995 --> 00:02:16,972
+with examples and edge cases.
+
+66
+00:02:16,972 --> 00:02:19,249
+Return errors as ordinary results,
+
+67
+00:02:19,249 --> 00:02:22,424
+so the model can read them and fix its next call.
+
+68
+00:02:22,774 --> 00:02:26,025
+A trick from practice is to make mistakes impossible.
+
+69
+00:02:26,025 --> 00:02:29,732
+One team found models kept getting relative file paths wrong,
+
+70
+00:02:29,732 --> 00:02:31,785
+so they required absolute paths,
+
+71
+00:02:31,785 --> 00:02:34,238
+and that whole class of error vanished.
+
+72
+00:02:35,488 --> 00:02:36,977
+A useful distinction.
+
+73
+00:02:36,977 --> 00:02:39,838
+A workflow follows a path you wrote in code.
+
+74
+00:02:39,838 --> 00:02:41,864
+An agent decides its own path.
+
+75
+00:02:41,864 --> 00:02:44,843
+Most useful systems should start as workflows,
+
+76
+00:02:44,843 --> 00:02:46,571
+because they are cheaper,
+
+77
+00:02:46,571 --> 00:02:48,359
+faster and easier to test.
+
+78
+00:02:48,709 --> 00:02:50,428
+Common workflow patterns.
+
+79
+00:02:50,428 --> 00:02:52,384
+Chain steps in a fixed order.
+
+80
+00:02:52,384 --> 00:02:54,932
+Route a request to a specialist prompt.
+
+81
+00:02:54,932 --> 00:02:57,184
+Run independent parts in parallel.
+
+82
+00:02:57,184 --> 00:03:00,089
+Let an orchestrator split work among workers.
+
+83
+00:03:00,089 --> 00:03:02,104
+Or loop a writer and a critic.
+
+84
+00:03:02,104 --> 00:03:05,660
+Use a true agent only when you cannot predict the steps.
+
+85
+00:03:06,910 --> 00:03:09,448
+What about many agents working together?
+
+86
+00:03:09,448 --> 00:03:11,582
+A research system from Anthropic,
+
+87
+00:03:11,582 --> 00:03:14,063
+with a lead agent and parallel helpers,
+
+88
+00:03:14,063 --> 00:03:17,582
+beat a single agent by about ninety percent on its tests.
+
+89
+00:03:17,582 --> 00:03:19,428
+But it used far more tokens.
+
+90
+00:03:19,778 --> 00:03:21,508
+The rule of thumb is one,
+
+91
+00:03:21,508 --> 00:03:22,582
+four, fifteen.
+
+92
+00:03:22,582 --> 00:03:24,730
+A chat costs one unit of tokens.
+
+93
+00:03:24,730 --> 00:03:26,520
+A single agent about four.
+
+94
+00:03:26,520 --> 00:03:28,609
+A team of agents about fifteen.
+
+95
+00:03:28,609 --> 00:03:30,279
+Pay that only for broad,
+
+96
+00:03:30,279 --> 00:03:32,069
+parallel, high value work,
+
+97
+00:03:32,069 --> 00:03:33,501
+not for most coding,
+
+98
+00:03:33,501 --> 00:03:35,709
+where steps depend on each other.
+
+99
+00:03:36,959 --> 00:03:38,330
+Agents need memory,
+
+100
+00:03:38,330 --> 00:03:39,343
+in two kinds.
+
+101
+00:03:39,343 --> 00:03:41,489
+Short term is the thread so far,
+
+102
+00:03:41,489 --> 00:03:43,277
+saved so a run can resume.
+
+103
+00:03:43,277 --> 00:03:46,019
+Long term is what carries across sessions.
+
+104
+00:03:46,369 --> 00:03:48,765
+Treat the context window as a budget.
+
+105
+00:03:48,765 --> 00:03:52,506
+Every tool result you keep costs tokens on every later step.
+
+106
+00:03:52,506 --> 00:03:55,137
+Summarise, drop what is no longer needed,
+
+107
+00:03:55,137 --> 00:03:58,995
+and write long plans to storage instead of keeping them in the
+
+108
+00:03:58,995 --> 00:03:59,638
+prompt.
+
+109
+00:04:00,888 --> 00:04:02,284
+Now the cost curve.
+
+110
+00:04:02,284 --> 00:04:05,258
+A language model has no memory between calls,
+
+111
+00:04:05,258 --> 00:04:08,718
+so an agent re sends its whole history at every step.
+
+112
+00:04:08,718 --> 00:04:12,056
+Step ten carries everything from steps one to nine.
+
+113
+00:04:12,406 --> 00:04:14,724
+I worked it out with assumed sizes.
+
+114
+00:04:14,724 --> 00:04:17,994
+A system prompt with tools of four thousand tokens.
+
+115
+00:04:17,994 --> 00:04:21,976
+Each step adds a hundred tokens of model reply and five hundred
+
+116
+00:04:21,976 --> 00:04:23,105
+of tool result.
+
+117
+00:04:23,105 --> 00:04:24,473
+That is arithmetic,
+
+118
+00:04:24,473 --> 00:04:25,780
+not a measurement.
+
+119
+00:04:27,030 --> 00:04:30,190
+Five steps bill twenty-six thousand input tokens.
+
+120
+00:04:30,190 --> 00:04:31,024
+Ten steps,
+
+121
+00:04:31,024 --> 00:04:32,515
+sixty-seven thousand,
+
+122
+00:04:32,515 --> 00:04:34,422
+two point six times as much.
+
+123
+00:04:34,422 --> 00:04:35,436
+Twenty steps,
+
+124
+00:04:35,436 --> 00:04:37,760
+a hundred and ninety-four thousand,
+
+125
+00:04:37,760 --> 00:04:39,370
+seven and a half times.
+
+126
+00:04:39,720 --> 00:04:40,625
+Forty steps,
+
+127
+00:04:40,625 --> 00:04:43,396
+six hundred and twenty-eight thousand tokens.
+
+128
+00:04:43,396 --> 00:04:44,867
+Eight times the steps,
+
+129
+00:04:44,867 --> 00:04:46,620
+twenty-four times the cost.
+
+130
+00:04:46,620 --> 00:04:49,901
+The cost grows with the square of the number of steps,
+
+131
+00:04:49,901 --> 00:04:51,994
+so long loops get expensive fast.
+
+132
+00:04:53,244 --> 00:04:55,141
+The rescue is prompt caching.
+
+133
+00:04:55,141 --> 00:04:58,705
+The provider keeps the work for an identical prompt start,
+
+134
+00:04:58,705 --> 00:05:01,867
+and charges only about a tenth for reading it back.
+
+135
+00:05:01,867 --> 00:05:04,224
+I used the notebook's example prices.
+
+136
+00:05:04,224 --> 00:05:07,214
+Two dollars per million tokens to read normally,
+
+137
+00:05:07,214 --> 00:05:09,398
+two fifty to write into the cache,
+
+138
+00:05:09,398 --> 00:05:11,123
+ten cents to read from it.
+
+139
+00:05:11,473 --> 00:05:16,042
+The twenty step agent costs about thirty-nine cents without caching and about
+
+140
+00:05:16,042 --> 00:05:17,283
+six cents with it,
+
+141
+00:05:17,283 --> 00:05:18,918
+eighty-five percent less.
+
+142
+00:05:18,918 --> 00:05:20,667
+And the notebook's example,
+
+143
+00:05:20,667 --> 00:05:23,939
+a hundred calls sharing a fifty thousand token prefix,
+
+144
+00:05:23,939 --> 00:05:26,533
+falls from ten dollars to sixty-two cents,
+
+145
+00:05:26,533 --> 00:05:27,887
+ninety-four percent.
+
+146
+00:05:29,137 --> 00:05:30,473
+Caching has rules.
+
+147
+00:05:30,473 --> 00:05:32,233
+Put stable content first,
+
+148
+00:05:32,233 --> 00:05:34,054
+and volatile content last.
+
+149
+00:05:34,054 --> 00:05:37,211
+Never put a timestamp or a user name at the top,
+
+150
+00:05:37,211 --> 00:05:40,246
+because one changed character ruins the match.
+
+151
+00:05:40,246 --> 00:05:42,614
+The order of invalidation is tools,
+
+152
+00:05:42,614 --> 00:05:44,010
+then system prompt,
+
+153
+00:05:44,010 --> 00:05:45,103
+then messages,
+
+154
+00:05:45,103 --> 00:05:48,563
+so changing a tool definition throws away everything.
+
+155
+00:05:48,913 --> 00:05:52,017
+Prompts below a minimum length are silently not cached.
+
+156
+00:05:52,017 --> 00:05:53,858
+And caches belong to one model,
+
+157
+00:05:53,858 --> 00:05:56,909
+so if you fall back to a different model in an outage,
+
+158
+00:05:56,909 --> 00:05:58,119
+you lose the cache.
+
+159
+00:05:59,369 --> 00:06:01,689
+A different idea is semantic caching.
+
+160
+00:06:01,689 --> 00:06:02,990
+Embed the question,
+
+161
+00:06:02,990 --> 00:06:06,102
+and if a very similar question was answered before,
+
+162
+00:06:06,102 --> 00:06:09,044
+return the old answer without calling the model.
+
+163
+00:06:09,044 --> 00:06:09,949
+It is cheap,
+
+164
+00:06:09,949 --> 00:06:11,081
+but it is lossy.
+
+165
+00:06:11,431 --> 00:06:14,903
+Cancel my order and cancel my subscription look similar,
+
+166
+00:06:14,903 --> 00:06:16,697
+but need different answers.
+
+167
+00:06:16,697 --> 00:06:20,805
+And answers built from one user's documents must never be served to
+
+168
+00:06:20,805 --> 00:06:23,467
+another. Use it only for frequently asked,
+
+169
+00:06:23,467 --> 00:06:24,740
+generic questions,
+
+170
+00:06:24,740 --> 00:06:26,303
+with strict thresholds,
+
+171
+00:06:26,303 --> 00:06:28,733
+short lifetimes and keys per customer.
+
+172
+00:06:29,983 --> 00:06:31,174
+Now protocols.
+
+173
+00:06:31,174 --> 00:06:31,836
+M C P,
+
+174
+00:06:31,836 --> 00:06:33,888
+the Model Context Protocol,
+
+175
+00:06:33,888 --> 00:06:37,065
+is a standard way for an agent to use tools.
+
+176
+00:06:37,065 --> 00:06:39,250
+Your application is the host.
+
+177
+00:06:39,250 --> 00:06:41,500
+It runs one client per server.
+
+178
+00:06:41,500 --> 00:06:43,420
+Each server offers tools,
+
+179
+00:06:43,420 --> 00:06:45,140
+resources and prompts,
+
+180
+00:06:45,140 --> 00:06:46,663
+over J S O N R P C.
+
+181
+00:06:47,013 --> 00:06:49,111
+Think of it like U S B for tools.
+
+182
+00:06:49,111 --> 00:06:50,755
+Write a tool server once,
+
+183
+00:06:50,755 --> 00:06:53,023
+and any compatible agent can use it.
+
+184
+00:06:53,023 --> 00:06:54,384
+Two ways to connect,
+
+185
+00:06:54,384 --> 00:06:55,518
+a local process,
+
+186
+00:06:55,518 --> 00:06:58,976
+or a web connection that can be shared and secured with O
+
+187
+00:06:58,976 --> 00:06:59,486
+Auth.
+
+188
+00:06:59,836 --> 00:07:02,192
+One way to remember who controls what.
+
+189
+00:07:02,192 --> 00:07:04,322
+Tools are controlled by the model.
+
+190
+00:07:04,322 --> 00:07:05,724
+Resources by the app.
+
+191
+00:07:05,724 --> 00:07:07,182
+Prompts by the person.
+
+192
+00:07:08,432 --> 00:07:11,596
+A big change landed in July twenty twenty-six.
+
+193
+00:07:11,596 --> 00:07:14,064
+The new M C P version is stateless.
+
+194
+00:07:14,064 --> 00:07:17,418
+There is no opening handshake and no session I D.
+
+195
+00:07:17,418 --> 00:07:20,076
+Every request carries its own version,
+
+196
+00:07:20,076 --> 00:07:21,974
+identity and capabilities.
+
+197
+00:07:22,324 --> 00:07:26,123
+That means any copy of a server behind a load balancer can
+
+198
+00:07:26,123 --> 00:07:27,532
+answer any request.
+
+199
+00:07:27,532 --> 00:07:30,657
+You can run an M C P server as a plain function
+
+200
+00:07:30,657 --> 00:07:32,311
+in Lambda or Cloud Run.
+
+201
+00:07:32,311 --> 00:07:36,845
+New headers also let gateways route and limit per tool without opening
+
+202
+00:07:36,845 --> 00:07:38,131
+the message body.
+
+203
+00:07:39,381 --> 00:07:40,699
+A second protocol,
+
+204
+00:07:40,699 --> 00:07:41,418
+A two A,
+
+205
+00:07:41,418 --> 00:07:42,975
+is for agent to agent.
+
+206
+00:07:42,975 --> 00:07:46,809
+When one agent wants to hand a task to another team's agent,
+
+207
+00:07:46,809 --> 00:07:50,223
+it finds it through a public card listing its skills,
+
+208
+00:07:50,223 --> 00:07:51,301
+and delegates.
+
+209
+00:07:51,301 --> 00:07:55,195
+It reached version one point zero in March twenty twenty-six.
+
+210
+00:07:55,545 --> 00:07:56,749
+Short version.
+
+211
+00:07:56,749 --> 00:07:59,156
+M C P is an agent calling tools.
+
+212
+00:07:59,156 --> 00:08:02,634
+A two A is an agent delegating to another agent.
+
+213
+00:08:02,634 --> 00:08:04,640
+Most teams need M C P now,
+
+214
+00:08:04,640 --> 00:08:07,984
+and A two A when agents cross team boundaries.
+
+215
+00:08:09,234 --> 00:08:11,312
+A chat turn fits one web request.
+
+216
+00:08:11,312 --> 00:08:12,322
+An agent task,
+
+217
+00:08:12,322 --> 00:08:13,950
+lasting minutes or hours,
+
+218
+00:08:13,950 --> 00:08:15,691
+with approvals and crashes,
+
+219
+00:08:15,691 --> 00:08:16,421
+does not.
+
+220
+00:08:16,421 --> 00:08:18,666
+So make it asynchronous and durable.
+
+221
+00:08:19,016 --> 00:08:21,528
+The A P I returns a task I D at once.
+
+222
+00:08:21,528 --> 00:08:23,305
+The task goes on a queue.
+
+223
+00:08:23,305 --> 00:08:26,000
+A durable workflow engine runs the loop,
+
+224
+00:08:26,000 --> 00:08:29,125
+and every model or tool call is a retried step.
+
+225
+00:08:29,125 --> 00:08:30,718
+Progress streams back,
+
+226
+00:08:30,718 --> 00:08:32,372
+code runs in a sandbox,
+
+227
+00:08:32,372 --> 00:08:35,067
+and state is checkpointed to a database.
+
+228
+00:08:36,317 --> 00:08:38,594
+Let me prove why checkpoints matter.
+
+229
+00:08:38,594 --> 00:08:40,473
+I built a working agent loop.
+
+230
+00:08:40,473 --> 00:08:41,497
+A step budget,
+
+231
+00:08:41,497 --> 00:08:43,660
+tool errors returned to the model,
+
+232
+00:08:43,660 --> 00:08:44,856
+an approval gate,
+
+233
+00:08:44,856 --> 00:08:47,360
+and a checkpoint saved after every step.
+
+234
+00:08:47,360 --> 00:08:49,466
+The model is a scripted stand in,
+
+235
+00:08:49,466 --> 00:08:51,060
+so nothing is generated.
+
+236
+00:08:51,410 --> 00:08:52,159
+The task.
+
+237
+00:08:52,159 --> 00:08:53,370
+Look up an order,
+
+238
+00:08:53,370 --> 00:08:54,523
+read the policy,
+
+239
+00:08:54,523 --> 00:08:55,791
+check eligibility,
+
+240
+00:08:55,791 --> 00:08:56,828
+draft a reply,
+
+241
+00:08:56,828 --> 00:08:57,808
+get approval,
+
+242
+00:08:57,808 --> 00:08:58,903
+issue a refund,
+
+243
+00:08:58,903 --> 00:08:59,941
+send an email,
+
+244
+00:08:59,941 --> 00:09:01,209
+update the ticket.
+
+245
+00:09:01,209 --> 00:09:02,362
+Nine tool steps.
+
+246
+00:09:02,362 --> 00:09:05,243
+I kill the process just before the email step,
+
+247
+00:09:05,243 --> 00:09:06,742
+then recover two ways.
+
+248
+00:09:07,992 --> 00:09:09,519
+Restart from step one,
+
+249
+00:09:09,519 --> 00:09:10,870
+with no protection.
+
+250
+00:09:10,870 --> 00:09:12,809
+Fourteen tool calls in total,
+
+251
+00:09:12,809 --> 00:09:15,159
+and the customer was refunded twice.
+
+252
+00:09:15,159 --> 00:09:17,626
+With an idempotency key on the refund,
+
+253
+00:09:17,626 --> 00:09:19,094
+still fourteen calls,
+
+254
+00:09:19,094 --> 00:09:20,210
+but one refund.
+
+255
+00:09:20,560 --> 00:09:22,266
+Resume from the checkpoint.
+
+256
+00:09:22,266 --> 00:09:24,191
+Only eight tool calls in total,
+
+257
+00:09:24,191 --> 00:09:25,237
+and one refund.
+
+258
+00:09:25,237 --> 00:09:26,722
+Resume, do not restart.
+
+259
+00:09:27,972 --> 00:09:29,087
+So four rules.
+
+260
+00:09:29,087 --> 00:09:31,068
+Checkpoint after every step,
+
+261
+00:09:31,068 --> 00:09:34,784
+so a crash at step thirty-seven resumes at thirty-seven.
+
+262
+00:09:34,784 --> 00:09:38,499
+Put an idempotency key on every tool with a side effect,
+
+263
+00:09:38,499 --> 00:09:41,286
+so a replay cannot charge or email twice.
+
+264
+00:09:41,636 --> 00:09:44,127
+Treat human approvals as a durable pause,
+
+265
+00:09:44,127 --> 00:09:45,567
+not a blocked process,
+
+266
+00:09:45,567 --> 00:09:47,616
+because approvals can take hours.
+
+267
+00:09:47,616 --> 00:09:49,720
+And when you deploy a new version,
+
+268
+00:09:49,720 --> 00:09:53,153
+let running tasks finish on the version they started with.
+
+269
+00:09:54,403 --> 00:09:55,608
+Agents run code,
+
+270
+00:09:55,608 --> 00:09:57,355
+so run it somewhere safe.
+
+271
+00:09:57,355 --> 00:09:58,380
+Three levels.
+
+272
+00:09:58,380 --> 00:10:01,935
+A micro virtual machine gives each task its own kernel,
+
+273
+00:10:01,935 --> 00:10:03,442
+and is the strongest.
+
+274
+00:10:03,442 --> 00:10:05,611
+G Visor intercepts system calls,
+
+275
+00:10:05,611 --> 00:10:06,816
+a middle option,
+
+276
+00:10:06,816 --> 00:10:08,323
+often used with GPUs.
+
+277
+00:10:08,323 --> 00:10:11,155
+A plain container shares the host's kernel,
+
+278
+00:10:11,155 --> 00:10:13,023
+so only for code you trust.
+
+279
+00:10:13,373 --> 00:10:14,834
+For untrusted code,
+
+280
+00:10:14,834 --> 00:10:16,104
+use a micro V M.
+
+281
+00:10:16,104 --> 00:10:18,263
+Add limits on time and memory,
+
+282
+00:10:18,263 --> 00:10:20,613
+control outbound network traffic,
+
+283
+00:10:20,613 --> 00:10:23,471
+and never put secrets inside the sandbox.
+
+284
+00:10:24,721 --> 00:10:27,238
+Failures also come from the outside.
+
+285
+00:10:27,238 --> 00:10:28,245
+Rate limits,
+
+286
+00:10:28,245 --> 00:10:29,314
+busy servers,
+
+287
+00:10:29,314 --> 00:10:32,083
+outages. Reliability is built in layers.
+
+288
+00:10:32,083 --> 00:10:34,223
+The S D K retries with jitter.
+
+289
+00:10:34,223 --> 00:10:36,488
+A gateway adds circuit breakers,
+
+290
+00:10:36,488 --> 00:10:38,061
+fallbacks and quotas.
+
+291
+00:10:38,061 --> 00:10:40,578
+The workflow engine retries durably.
+
+292
+00:10:40,578 --> 00:10:44,228
+And the app streams results and uses idempotency keys.
+
+293
+00:10:44,578 --> 00:10:46,849
+Next I will measure two of those layers.
+
+294
+00:10:46,849 --> 00:10:48,397
+First, why jitter matters.
+
+295
+00:10:48,397 --> 00:10:50,358
+Then what a circuit breaker saves.
+
+296
+00:10:51,608 --> 00:10:53,998
+When a server says too many requests,
+
+297
+00:10:53,998 --> 00:10:55,630
+with a four twenty-nine,
+
+298
+00:10:55,630 --> 00:10:56,679
+clients retry.
+
+299
+00:10:56,679 --> 00:10:58,836
+How they wait matters enormously.
+
+300
+00:10:58,836 --> 00:11:02,509
+I simulated two hundred clients all calling at second zero,
+
+301
+00:11:02,509 --> 00:11:05,715
+to a server that accepts fifty requests per second.
+
+302
+00:11:05,715 --> 00:11:07,755
+That capacity is my assumption.
+
+303
+00:11:08,105 --> 00:11:09,074
+Three rules.
+
+304
+00:11:09,074 --> 00:11:10,164
+Retry at once,
+
+305
+00:11:10,164 --> 00:11:11,860
+every tenth of a second.
+
+306
+00:11:11,860 --> 00:11:14,464
+Exponential backoff with no randomness.
+
+307
+00:11:14,464 --> 00:11:17,190
+And exponential backoff with full jitter,
+
+308
+00:11:17,190 --> 00:11:19,794
+a random wait between zero and the cap.
+
+309
+00:11:19,794 --> 00:11:22,458
+Each client gives up after twelve tries.
+
+310
+00:11:23,708 --> 00:11:27,404
+Retrying at once made two thousand and ten rejected attempts,
+
+311
+00:11:27,404 --> 00:11:30,531
+and a hundred and forty clients gave up completely.
+
+312
+00:11:30,531 --> 00:11:34,681
+Backoff without jitter made the same two thousand and ten rejections,
+
+313
+00:11:34,681 --> 00:11:38,491
+and the last client finished at two hundred and eleven seconds.
+
+314
+00:11:38,841 --> 00:11:43,018
+Full jitter made only four hundred and forty-four rejected attempts,
+
+315
+00:11:43,018 --> 00:11:45,338
+finished in nine point nine seconds,
+
+316
+00:11:45,338 --> 00:11:46,672
+and nobody gave up.
+
+317
+00:11:47,922 --> 00:11:49,384
+Here is the other view.
+
+318
+00:11:49,384 --> 00:11:50,412
+Without jitter,
+
+319
+00:11:50,412 --> 00:11:54,147
+all the failed clients wait the same time and come back together,
+
+320
+00:11:54,147 --> 00:11:54,850
+in waves.
+
+321
+00:11:54,850 --> 00:11:56,637
+Each wave hits the same wall.
+
+322
+00:11:56,987 --> 00:11:59,369
+With full jitter the retries spread out,
+
+323
+00:11:59,369 --> 00:12:01,805
+so the server serves them as it has room.
+
+324
+00:12:01,805 --> 00:12:02,671
+Same server,
+
+325
+00:12:02,671 --> 00:12:03,591
+same clients.
+
+326
+00:12:03,591 --> 00:12:05,757
+The only change was a random number.
+
+327
+00:12:07,007 --> 00:12:08,408
+The practical rules.
+
+328
+00:12:08,408 --> 00:12:11,909
+Wait a random time between zero and the smaller of a cap
+
+329
+00:12:11,909 --> 00:12:14,536
+and base times two to the attempt number.
+
+330
+00:12:14,536 --> 00:12:17,162
+If the server sends a retry after header,
+
+331
+00:12:17,162 --> 00:12:18,213
+obey it first.
+
+332
+00:12:18,563 --> 00:12:20,807
+Retry only what can succeed later.
+
+333
+00:12:20,807 --> 00:12:22,047
+Four twenty-nine,
+
+334
+00:12:22,047 --> 00:12:23,051
+five hundred,
+
+335
+00:12:23,051 --> 00:12:25,354
+five oh three and five twenty-nine.
+
+336
+00:12:25,354 --> 00:12:27,657
+Never blindly retry a four hundred,
+
+337
+00:12:27,657 --> 00:12:30,019
+because the request itself is wrong.
+
+338
+00:12:31,269 --> 00:12:34,481
+A circuit breaker protects you when a backend is down.
+
+339
+00:12:34,481 --> 00:12:35,810
+It has three states.
+
+340
+00:12:35,810 --> 00:12:36,972
+Closed is normal,
+
+341
+00:12:36,972 --> 00:12:38,467
+and it counts failures.
+
+342
+00:12:38,467 --> 00:12:40,405
+After enough failures it opens,
+
+343
+00:12:40,405 --> 00:12:41,900
+and requests fail fast,
+
+344
+00:12:41,900 --> 00:12:43,229
+or go to a fallback,
+
+345
+00:12:43,229 --> 00:12:45,444
+without touching the broken service.
+
+346
+00:12:45,794 --> 00:12:47,853
+After a cooldown it goes half open,
+
+347
+00:12:47,853 --> 00:12:49,807
+and lets a trial request through.
+
+348
+00:12:49,807 --> 00:12:50,758
+If that works,
+
+349
+00:12:50,758 --> 00:12:51,497
+it closes.
+
+350
+00:12:51,497 --> 00:12:52,078
+If not,
+
+351
+00:12:52,078 --> 00:12:53,082
+it opens again.
+
+352
+00:12:53,082 --> 00:12:54,666
+Like a fuse in your house,
+
+353
+00:12:54,666 --> 00:12:56,303
+but one that resets itself.
+
+354
+00:12:57,553 --> 00:13:00,782
+I simulated a backend that is down for thirty seconds,
+
+355
+00:13:00,782 --> 00:13:04,011
+with twenty requests per second arriving for a minute.
+
+356
+00:13:04,011 --> 00:13:05,236
+Without a breaker,
+
+357
+00:13:05,236 --> 00:13:07,630
+six hundred calls hit the dead backend,
+
+358
+00:13:07,630 --> 00:13:09,245
+each waiting and failing.
+
+359
+00:13:09,595 --> 00:13:13,493
+With a breaker that opens after five failures and waits ten seconds
+
+360
+00:13:13,493 --> 00:13:14,537
+before a trial,
+
+361
+00:13:14,537 --> 00:13:15,800
+seven calls hit it.
+
+362
+00:13:15,800 --> 00:13:16,678
+Same outage,
+
+363
+00:13:16,678 --> 00:13:18,546
+a fraction of the wasted work,
+
+364
+00:13:18,546 --> 00:13:20,413
+and quick fallbacks for users.
+
+365
+00:13:21,663 --> 00:13:23,382
+What should the fallback be?
+
+366
+00:13:23,382 --> 00:13:25,747
+First, the same model in another region.
+
+367
+00:13:25,747 --> 00:13:27,467
+Only then a different model.
+
+368
+00:13:27,467 --> 00:13:29,616
+A different model changes behaviour,
+
+369
+00:13:29,616 --> 00:13:31,766
+because prompts are tuned per model,
+
+370
+00:13:31,766 --> 00:13:33,593
+and it loses the prompt cache.
+
+371
+00:13:33,943 --> 00:13:37,816
+An A I gateway sits between your apps and the model providers.
+
+372
+00:13:37,816 --> 00:13:39,459
+It offers one interface,
+
+373
+00:13:39,459 --> 00:13:40,398
+key storage,
+
+374
+00:13:40,398 --> 00:13:41,572
+quotas per team,
+
+375
+00:13:41,572 --> 00:13:43,626
+routing, fallbacks and metrics.
+
+376
+00:13:43,626 --> 00:13:45,387
+Open source options exist,
+
+377
+00:13:45,387 --> 00:13:48,791
+and the simple rule is to extend what you already run.
+
+378
+00:13:50,041 --> 00:13:52,952
+Two small features that improve reliability.
+
+379
+00:13:52,952 --> 00:13:55,621
+Streaming shows the first words quickly,
+
+380
+00:13:55,621 --> 00:13:58,351
+and avoids idle timeouts on long answers.
+
+381
+00:13:58,351 --> 00:14:02,355
+And structured outputs make the model follow a schema exactly.
+
+382
+00:14:02,705 --> 00:14:03,542
+A caution.
+
+383
+00:14:03,542 --> 00:14:05,456
+Valid does not mean correct.
+
+384
+00:14:05,456 --> 00:14:08,685
+A response can be perfect J S O N and still wrong.
+
+385
+00:14:08,685 --> 00:14:10,000
+Check the content,
+
+386
+00:14:10,000 --> 00:14:11,376
+not just the shape.
+
+387
+00:14:12,626 --> 00:14:13,778
+Put it together.
+
+388
+00:14:13,778 --> 00:14:16,197
+The same layers appear on every cloud.
+
+389
+00:14:16,197 --> 00:14:18,502
+An edge firewall and A P I in front,
+
+390
+00:14:18,502 --> 00:14:20,518
+then your app or agent runtime,
+
+391
+00:14:20,518 --> 00:14:22,822
+then an A I gateway with guardrails,
+
+392
+00:14:22,822 --> 00:14:23,975
+then the models.
+
+393
+00:14:23,975 --> 00:14:25,703
+Beside them sit retrieval,
+
+394
+00:14:25,703 --> 00:14:28,122
+state, queues with a durable workflow,
+
+395
+00:14:28,122 --> 00:14:29,678
+sandboxed tool servers,
+
+396
+00:14:29,678 --> 00:14:31,118
+identity and tracing.
+
+397
+00:14:31,468 --> 00:14:32,785
+The names differ.
+
+398
+00:14:32,785 --> 00:14:35,042
+A W S has Bedrock and AgentCore,
+
+399
+00:14:35,042 --> 00:14:37,738
+Google has Gemini and its Agent Engine,
+
+400
+00:14:37,738 --> 00:14:39,118
+Azure has Foundry.
+
+401
+00:14:39,118 --> 00:14:40,685
+This is my synthesis,
+
+402
+00:14:40,685 --> 00:14:42,128
+not a vendor table.
+
+403
+00:14:42,128 --> 00:14:44,259
+The shape is what to remember.
+
+404
+00:14:45,509 --> 00:14:47,044
+For ShopNest Copilot.
+
+405
+00:14:47,044 --> 00:14:48,517
+Start as a workflow,
+
+406
+00:14:48,517 --> 00:14:49,561
+not an agent.
+
+407
+00:14:49,561 --> 00:14:53,429
+A fixed route from ticket to intent to retrieval to answer.
+
+408
+00:14:53,429 --> 00:14:56,559
+Add a refund tool only behind a human approval,
+
+409
+00:14:56,559 --> 00:14:59,322
+with an idempotency key and a checkpoint.
+
+410
+00:14:59,672 --> 00:15:01,628
+Tools are served over M C P,
+
+411
+00:15:01,628 --> 00:15:04,624
+stable prompt content goes first for caching,
+
+412
+00:15:04,624 --> 00:15:08,964
+and calls go through a gateway with jittered retries and a breaker.
+
+413
+00:15:08,964 --> 00:15:13,121
+We add loops and more agents only if the evaluations from lesson
+
+414
+00:15:13,121 --> 00:15:14,588
+seven show they pay.
+
+415
+00:15:15,838 --> 00:15:17,808
+Four words to carry forward.
+
+416
+00:15:17,808 --> 00:15:19,040
+Idempotency key:
+
+417
+00:15:19,040 --> 00:15:22,610
+a label that makes a repeated action happen only once.
+
+418
+00:15:22,610 --> 00:15:25,442
+Checkpoint: saved progress to resume from.
+
+419
+00:15:25,792 --> 00:15:27,976
+Jitter: a random delay in retries.
+
+420
+00:15:27,976 --> 00:15:29,355
+And circuit breaker:
+
+421
+00:15:29,355 --> 00:15:32,228
+a switch that stops calls to a broken service.
+
+422
+00:15:33,478 --> 00:15:34,754
+Interview corner.
+
+423
+00:15:34,754 --> 00:15:38,278
+Asked how you make a long running agent safe to retry,
+
+424
+00:15:38,278 --> 00:15:40,526
+say: checkpoint after every step,
+
+425
+00:15:40,526 --> 00:15:42,409
+resume rather than restart,
+
+426
+00:15:42,409 --> 00:15:45,811
+and put idempotency keys on tools with side effects.
+
+427
+00:15:45,811 --> 00:15:46,723
+In my test,
+
+428
+00:15:46,723 --> 00:15:49,578
+a restart refunded twice and a resume once.
+
+429
+00:15:49,928 --> 00:15:51,892
+Asked why add jitter to retries,
+
+430
+00:15:51,892 --> 00:15:52,983
+say: without it,
+
+431
+00:15:52,983 --> 00:15:54,456
+clients retry in waves.
+
+432
+00:15:54,456 --> 00:15:56,038
+With two hundred clients,
+
+433
+00:15:56,038 --> 00:15:59,911
+full jitter finished in ten seconds against two hundred and eleven,
+
+434
+00:15:59,911 --> 00:16:02,093
+with a third of the wasted attempts.
+
+435
+00:16:03,343 --> 00:16:04,139
+Your turn.
+
+436
+00:16:04,139 --> 00:16:06,753
+The zip for this lesson has three scripts.
+
+437
+00:16:06,753 --> 00:16:08,173
+The crash experiment,
+
+438
+00:16:08,173 --> 00:16:10,219
+the retry and breaker simulator,
+
+439
+00:16:10,219 --> 00:16:12,151
+and the agent cost calculator.
+
+440
+00:16:12,151 --> 00:16:15,845
+Remove the idempotency key and watch the refund happen twice.
+
+441
+00:16:16,195 --> 00:16:19,981
+Then change the capacity or the number of clients in the retry
+
+442
+00:16:19,981 --> 00:16:23,767
+test. One changed number teaches more than an hour of reading.
+
+443
+00:16:25,017 --> 00:16:28,040
+Recap. An agent is a model with tools in a loop,
+
+444
+00:16:28,040 --> 00:16:29,726
+so start with a workflow.
+
+445
+00:16:29,726 --> 00:16:31,703
+The loop re sends its history,
+
+446
+00:16:31,703 --> 00:16:35,365
+so eight times the steps cost twenty-four times the tokens,
+
+447
+00:16:35,365 --> 00:16:39,318
+and caching cuts it by about eighty-five to ninety-four percent.
+
+448
+00:16:39,668 --> 00:16:42,644
+Checkpoint, resume and use idempotency keys,
+
+449
+00:16:42,644 --> 00:16:44,442
+or a crash refunds twice.
+
+450
+00:16:44,442 --> 00:16:48,038
+Jitter turned two hundred and eleven seconds into ten,
+
+451
+00:16:48,038 --> 00:16:51,510
+and a breaker cut six hundred wasted calls to seven.
+
+452
+00:16:51,510 --> 00:16:52,502
+Next lesson:
+
+453
+00:16:52,502 --> 00:16:54,237
+security and governance.
+
+454
+00:16:55,487 --> 00:16:56,766
+In the next lesson:
+
+455
+00:16:56,766 --> 00:16:58,323
+security and governance.
+
+456
+00:16:58,323 --> 00:17:01,158
+Identity, prompt injection and least privilege.
+
+457
+00:17:01,508 --> 00:17:03,101
+Subscribe so you don't miss it.
+
+458
+00:17:03,101 --> 00:17:04,375
+See you in the notebook.
+
