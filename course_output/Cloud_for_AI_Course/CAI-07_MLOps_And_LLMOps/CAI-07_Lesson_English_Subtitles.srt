@@ -1,0 +1,1696 @@
+1
+00:00:00,500 --> 00:00:01,864
+I changed one prompt.
+
+2
+00:00:01,864 --> 00:00:03,500
+The overall score went up,
+
+3
+00:00:03,500 --> 00:00:05,574
+from ninety percent to ninety-two.
+
+4
+00:00:05,574 --> 00:00:07,484
+Everyone would have shipped it.
+
+5
+00:00:07,484 --> 00:00:09,994
+But one group of customers got much worse.
+
+6
+00:00:09,994 --> 00:00:13,377
+Refund tickets fell from a hundred percent right to fifty.
+
+7
+00:00:13,727 --> 00:00:15,336
+A simple automatic check,
+
+8
+00:00:15,336 --> 00:00:16,279
+an eval gate,
+
+9
+00:00:16,279 --> 00:00:18,333
+caught it and blocked the change.
+
+10
+00:00:18,333 --> 00:00:21,274
+This lesson is about shipping A I changes safely,
+
+11
+00:00:21,274 --> 00:00:22,384
+again and again,
+
+12
+00:00:22,384 --> 00:00:24,604
+without breaking what already works.
+
+13
+00:00:25,854 --> 00:00:29,359
+Welcome to lesson seven of the cloud for A I engineers course,
+
+14
+00:00:29,359 --> 00:00:30,686
+on The Code Notebook.
+
+15
+00:00:31,036 --> 00:00:34,171
+The handwritten notes and the code for this lesson are linked in
+
+16
+00:00:34,171 --> 00:00:35,093
+the description.
+
+17
+00:00:36,343 --> 00:00:38,954
+So far we built the pieces of an A I system.
+
+18
+00:00:38,954 --> 00:00:40,641
+Now we run it as a product.
+
+19
+00:00:40,641 --> 00:00:42,436
+That means changing it often,
+
+20
+00:00:42,436 --> 00:00:43,742
+without breaking it,
+
+21
+00:00:43,742 --> 00:00:46,463
+and knowing quickly when something goes wrong.
+
+22
+00:00:46,813 --> 00:00:48,988
+That discipline has two names.
+
+23
+00:00:48,988 --> 00:00:50,971
+M L Ops for classic models,
+
+24
+00:00:50,971 --> 00:00:53,659
+and L L M Ops for language model apps.
+
+25
+00:00:53,659 --> 00:00:56,026
+As always I label my experiments.
+
+26
+00:00:56,026 --> 00:00:59,609
+The eval gate uses a toy keyword model as a stand in
+
+27
+00:00:59,609 --> 00:01:01,209
+for a language model,
+
+28
+00:01:01,209 --> 00:01:02,936
+with synthetic tickets.
+
+29
+00:01:02,936 --> 00:01:06,136
+The canary and trials results are simulations.
+
+30
+00:01:07,386 --> 00:01:09,678
+Classic M L Ops has three levels,
+
+31
+00:01:09,678 --> 00:01:11,847
+from a well known Google guide.
+
+32
+00:01:11,847 --> 00:01:14,139
+Level zero is everything by hand.
+
+33
+00:01:14,139 --> 00:01:17,237
+Notebooks, a model handed over to an engineer,
+
+34
+00:01:17,237 --> 00:01:19,406
+and nobody watching afterwards.
+
+35
+00:01:19,756 --> 00:01:21,995
+Level one automates the training.
+
+36
+00:01:21,995 --> 00:01:25,505
+A pipeline retrains the model on fresh data by itself,
+
+37
+00:01:25,505 --> 00:01:27,078
+when new data arrives,
+
+38
+00:01:27,078 --> 00:01:28,168
+on a schedule,
+
+39
+00:01:28,168 --> 00:01:29,983
+or when performance drops.
+
+40
+00:01:30,333 --> 00:01:33,558
+Level two automates the shipping of that pipeline.
+
+41
+00:01:33,558 --> 00:01:38,038
+The pipeline code itself is tested and deployed like any other service.
+
+42
+00:01:39,288 --> 00:01:41,648
+Language model apps change the picture.
+
+43
+00:01:41,648 --> 00:01:43,185
+Often you train nothing.
+
+44
+00:01:43,185 --> 00:01:44,722
+You call a hosted model.
+
+45
+00:01:44,722 --> 00:01:46,203
+So what do you version?
+
+46
+00:01:46,203 --> 00:01:47,082
+The prompts.
+
+47
+00:01:47,082 --> 00:01:48,783
+The model and its settings.
+
+48
+00:01:48,783 --> 00:01:50,594
+The tools the model may call.
+
+49
+00:01:50,594 --> 00:01:51,912
+The retrieval index.
+
+50
+00:01:51,912 --> 00:01:53,833
+And the code that wraps it all.
+
+51
+00:01:54,183 --> 00:01:56,845
+Quality is no longer one accuracy number.
+
+52
+00:01:56,845 --> 00:01:58,679
+It is a set of evaluations,
+
+53
+00:01:58,679 --> 00:02:00,572
+plus checks on live traffic.
+
+54
+00:02:00,572 --> 00:02:03,649
+The thing you watch is the trace of one request.
+
+55
+00:02:03,649 --> 00:02:06,607
+And the same input can give different outputs,
+
+56
+00:02:06,607 --> 00:02:08,678
+so you must run several trials.
+
+57
+00:02:09,928 --> 00:02:12,207
+There is one more reason for all this.
+
+58
+00:02:12,207 --> 00:02:14,703
+Models decay without anyone touching them.
+
+59
+00:02:14,703 --> 00:02:15,896
+The world changes,
+
+60
+00:02:15,896 --> 00:02:17,633
+customers write differently,
+
+61
+00:02:17,633 --> 00:02:18,935
+new products appear,
+
+62
+00:02:18,935 --> 00:02:22,570
+and the model's inputs drift away from what it saw in training.
+
+63
+00:02:22,920 --> 00:02:24,270
+Without monitoring,
+
+64
+00:02:24,270 --> 00:02:25,444
+nothing crashes.
+
+65
+00:02:25,444 --> 00:02:27,675
+The answers just get slowly worse.
+
+66
+00:02:27,675 --> 00:02:29,964
+That is why level zero is so risky.
+
+67
+00:02:29,964 --> 00:02:34,072
+Classic M L Ops watches the distribution of inputs and the quality
+
+68
+00:02:34,072 --> 00:02:34,953
+of outputs,
+
+69
+00:02:34,953 --> 00:02:37,301
+and retrains when they move too far.
+
+70
+00:02:38,551 --> 00:02:40,203
+Here is the loop to build.
+
+71
+00:02:40,203 --> 00:02:41,194
+Make a change,
+
+72
+00:02:41,194 --> 00:02:42,681
+to a prompt or a model.
+
+73
+00:02:42,681 --> 00:02:45,269
+Score the whole test set with an eval gate.
+
+74
+00:02:45,269 --> 00:02:48,078
+Send a little traffic to the new version first,
+
+75
+00:02:48,078 --> 00:02:49,180
+called a canary.
+
+76
+00:02:49,530 --> 00:02:53,436
+Then watch it with traces and automatic judges on live requests.
+
+77
+00:02:53,436 --> 00:02:55,676
+When something fails in production,
+
+78
+00:02:55,676 --> 00:02:58,146
+turn that failure into a new test case.
+
+79
+00:02:58,146 --> 00:03:02,282
+Every change is then scored against everything that ever went wrong.
+
+80
+00:03:02,632 --> 00:03:04,628
+That last arrow is the whole point.
+
+81
+00:03:04,628 --> 00:03:06,880
+The loop gets harder to fool every week.
+
+82
+00:03:08,130 --> 00:03:10,476
+Testing an A I system has three layers,
+
+83
+00:03:10,476 --> 00:03:12,604
+and each catches a different break.
+
+84
+00:03:12,604 --> 00:03:13,423
+Code tests,
+
+85
+00:03:13,423 --> 00:03:14,514
+the normal kind.
+
+86
+00:03:14,514 --> 00:03:17,570
+Do the functions work and do the parts fit together?
+
+87
+00:03:17,920 --> 00:03:19,323
+Data and model tests.
+
+88
+00:03:19,323 --> 00:03:20,840
+Does training converge,
+
+89
+00:03:20,840 --> 00:03:22,468
+are there missing values,
+
+90
+00:03:22,468 --> 00:03:25,444
+does the data still look like the reference data?
+
+91
+00:03:25,444 --> 00:03:28,027
+And evaluation suites for language models,
+
+92
+00:03:28,027 --> 00:03:30,442
+where graders score answers on a fixed,
+
+93
+00:03:30,442 --> 00:03:31,958
+golden set of examples.
+
+94
+00:03:32,308 --> 00:03:34,109
+Run all three on every change.
+
+95
+00:03:34,109 --> 00:03:36,439
+A failure in any layer blocks the merge.
+
+96
+00:03:37,689 --> 00:03:41,207
+An eval gate is the check that stands between a change and
+
+97
+00:03:41,207 --> 00:03:43,590
+production. It asks several questions.
+
+98
+00:03:43,590 --> 00:03:47,392
+Does the challenger beat the current champion by a real margin,
+
+99
+00:03:47,392 --> 00:03:48,640
+not just match it?
+
+100
+00:03:48,990 --> 00:03:51,196
+Does any important slice get worse,
+
+101
+00:03:51,196 --> 00:03:53,742
+meaning a group of cases such as refunds?
+
+102
+00:03:53,742 --> 00:03:55,891
+Are the speed and size limits met?
+
+103
+00:03:55,891 --> 00:03:59,681
+And does the model actually load and serve in a test container?
+
+104
+00:03:59,681 --> 00:04:02,849
+Only if every answer is yes does the change move on.
+
+105
+00:04:04,099 --> 00:04:05,652
+I built a working gate.
+
+106
+00:04:05,652 --> 00:04:08,818
+The task is to route a support ticket to an intent,
+
+107
+00:04:08,818 --> 00:04:10,026
+refund, delivery,
+
+108
+00:04:10,026 --> 00:04:11,350
+account or product.
+
+109
+00:04:11,350 --> 00:04:12,674
+The model is a toy.
+
+110
+00:04:12,674 --> 00:04:13,882
+A keyword scorer.
+
+111
+00:04:13,882 --> 00:04:16,299
+It is a stand in for a language model,
+
+112
+00:04:16,299 --> 00:04:18,774
+and the prompt is its list of keywords.
+
+113
+00:04:19,124 --> 00:04:22,604
+I generated a hundred synthetic tickets from templates.
+
+114
+00:04:22,604 --> 00:04:24,315
+Sixty are about delivery,
+
+115
+00:04:24,315 --> 00:04:26,556
+the rest split between the others,
+
+116
+00:04:26,556 --> 00:04:29,800
+which is my assumption of a typical imbalanced mix.
+
+117
+00:04:29,800 --> 00:04:31,687
+Version one is the baseline.
+
+118
+00:04:31,687 --> 00:04:33,633
+Version two adds one keyword,
+
+119
+00:04:33,633 --> 00:04:34,754
+the word order,
+
+120
+00:04:34,754 --> 00:04:35,698
+to delivery.
+
+121
+00:04:36,948 --> 00:04:38,601
+Delivery tickets improved,
+
+122
+00:04:38,601 --> 00:04:41,521
+from eighty-six point seven percent to a hundred.
+
+123
+00:04:41,521 --> 00:04:44,055
+Great, the new keyword fixed tickets like,
+
+124
+00:04:44,055 --> 00:04:45,267
+where is my order.
+
+125
+00:04:45,617 --> 00:04:48,649
+But the word order also appears in refund tickets.
+
+126
+00:04:48,649 --> 00:04:51,343
+Refund went from a hundred percent to fifty.
+
+127
+00:04:51,343 --> 00:04:53,870
+Overall, the score went up by two points,
+
+128
+00:04:53,870 --> 00:04:56,509
+because delivery tickets were the majority.
+
+129
+00:04:56,859 --> 00:04:58,097
+The average improved.
+
+130
+00:04:58,097 --> 00:05:00,523
+The product got worse for an important group.
+
+131
+00:05:01,773 --> 00:05:03,322
+The gate has two rules.
+
+132
+00:05:03,322 --> 00:05:05,387
+The overall score must not fall,
+
+133
+00:05:05,387 --> 00:05:08,772
+and no single intent may drop by more than five points.
+
+134
+00:05:08,772 --> 00:05:11,927
+Version two passed the first and failed the second.
+
+135
+00:05:12,277 --> 00:05:15,346
+The gate printed blocked and exited with code one.
+
+136
+00:05:15,346 --> 00:05:16,369
+In a pipeline,
+
+137
+00:05:16,369 --> 00:05:18,528
+that failure code stops the merge.
+
+138
+00:05:18,528 --> 00:05:20,631
+No person had to notice anything.
+
+139
+00:05:21,881 --> 00:05:23,333
+The lesson is simple.
+
+140
+00:05:23,333 --> 00:05:24,786
+Averages hide damage.
+
+141
+00:05:24,786 --> 00:05:26,296
+Always score by slice,
+
+142
+00:05:26,296 --> 00:05:28,097
+meaning by type of request,
+
+143
+00:05:28,097 --> 00:05:29,781
+language, customer group,
+
+144
+00:05:29,781 --> 00:05:31,001
+whatever matters.
+
+145
+00:05:31,001 --> 00:05:34,428
+A model that is better on average can be much worse for
+
+146
+00:05:34,428 --> 00:05:35,299
+a minority.
+
+147
+00:05:35,649 --> 00:05:37,470
+Also keep a regression suite,
+
+148
+00:05:37,470 --> 00:05:40,504
+a set of cases that must stay at a hundred percent.
+
+149
+00:05:40,504 --> 00:05:42,435
+New capability tests start low,
+
+150
+00:05:42,435 --> 00:05:43,814
+like a hill to climb.
+
+151
+00:05:43,814 --> 00:05:45,413
+When one reaches the top,
+
+152
+00:05:45,413 --> 00:05:47,730
+graduate it into the regression suite.
+
+153
+00:05:48,980 --> 00:05:50,543
+How do you choose slices?
+
+154
+00:05:50,543 --> 00:05:52,699
+Start from your own failure reports.
+
+155
+00:05:52,699 --> 00:05:54,693
+Group tickets by type of request,
+
+156
+00:05:54,693 --> 00:05:55,555
+by language,
+
+157
+00:05:55,555 --> 00:05:56,687
+by customer tier,
+
+158
+00:05:56,687 --> 00:05:57,441
+by length,
+
+159
+00:05:57,441 --> 00:05:59,597
+and by which tool the answer needed.
+
+160
+00:05:59,597 --> 00:06:02,722
+Any group you would be embarrassed to fail is a slice.
+
+161
+00:06:03,072 --> 00:06:06,308
+Give each slice enough test cases to be meaningful.
+
+162
+00:06:06,308 --> 00:06:10,133
+Ten refund tickets can move fifty points on a single mistake,
+
+163
+00:06:10,133 --> 00:06:14,075
+so keep growing the small slices from real production failures.
+
+164
+00:06:15,325 --> 00:06:16,697
+Who does the grading?
+
+165
+00:06:16,697 --> 00:06:18,344
+Start with error analysis.
+
+166
+00:06:18,344 --> 00:06:20,430
+Read real failures and group them.
+
+167
+00:06:20,430 --> 00:06:22,187
+That tells you what to test.
+
+168
+00:06:22,187 --> 00:06:24,163
+Then prefer simple code graders,
+
+169
+00:06:24,163 --> 00:06:26,195
+a program that checks the answer,
+
+170
+00:06:26,195 --> 00:06:27,347
+wherever you can.
+
+171
+00:06:27,697 --> 00:06:31,565
+Use a language model as judge only for what code cannot check.
+
+172
+00:06:31,565 --> 00:06:33,850
+Keep judges to yes or no questions,
+
+173
+00:06:33,850 --> 00:06:36,193
+and check them against human labels,
+
+174
+00:06:36,193 --> 00:06:39,006
+so you know the judge itself is trustworthy.
+
+175
+00:06:40,256 --> 00:06:41,336
+One more trap.
+
+176
+00:06:41,336 --> 00:06:44,576
+A language model can answer differently each time.
+
+177
+00:06:44,576 --> 00:06:47,516
+So an eval that runs each case once is noisy.
+
+178
+00:06:47,516 --> 00:06:49,676
+You run each case several times.
+
+179
+00:06:50,026 --> 00:06:51,912
+There are two ways to count.
+
+180
+00:06:51,912 --> 00:06:55,390
+Pass at k asks whether at least one of k runs succeeds.
+
+181
+00:06:55,390 --> 00:06:58,337
+Pass hat k asks whether all of k runs succeed.
+
+182
+00:06:58,337 --> 00:07:00,754
+The first measures can it ever do it.
+
+183
+00:07:00,754 --> 00:07:03,171
+The second measures can I rely on it.
+
+184
+00:07:04,421 --> 00:07:05,563
+I simulated it.
+
+185
+00:07:05,563 --> 00:07:08,990
+Suppose an agent succeeds ninety percent of the time.
+
+186
+00:07:08,990 --> 00:07:10,313
+That sounds great.
+
+187
+00:07:10,313 --> 00:07:11,636
+Run it five times,
+
+188
+00:07:11,636 --> 00:07:15,724
+and the chance that all five succeed is only fifty-nine percent.
+
+189
+00:07:16,074 --> 00:07:16,833
+Ten runs,
+
+190
+00:07:16,833 --> 00:07:18,236
+thirty-five percent.
+
+191
+00:07:18,236 --> 00:07:20,397
+And with an eighty percent agent,
+
+192
+00:07:20,397 --> 00:07:23,728
+all ten runs succeed just eleven percent of the time.
+
+193
+00:07:23,728 --> 00:07:26,065
+Reliability falls fast with repeats.
+
+194
+00:07:26,065 --> 00:07:30,213
+I checked both formulas against a hundred thousand simulated tasks,
+
+195
+00:07:30,213 --> 00:07:31,440
+and they matched.
+
+196
+00:07:32,690 --> 00:07:34,962
+Here is the gate as a pipeline file,
+
+197
+00:07:34,962 --> 00:07:36,325
+a sketch for GitHub.
+
+198
+00:07:36,325 --> 00:07:37,801
+On every pull request,
+
+199
+00:07:37,801 --> 00:07:39,107
+run the unit tests,
+
+200
+00:07:39,107 --> 00:07:40,243
+the data checks,
+
+201
+00:07:40,243 --> 00:07:41,947
+and the evaluation suites.
+
+202
+00:07:41,947 --> 00:07:45,127
+Any step that exits with a failure blocks the merge.
+
+203
+00:07:45,477 --> 00:07:47,987
+The same idea works in any C I system.
+
+204
+00:07:47,987 --> 00:07:50,796
+What matters is that the gate is automatic,
+
+205
+00:07:50,796 --> 00:07:52,290
+runs on every change,
+
+206
+00:07:52,290 --> 00:07:55,158
+and cannot be skipped by someone in a hurry.
+
+207
+00:07:56,408 --> 00:07:58,446
+A registry answers one question.
+
+208
+00:07:58,446 --> 00:08:00,766
+Which exact version is in production,
+
+209
+00:08:00,766 --> 00:08:01,898
+who approved it,
+
+210
+00:08:01,898 --> 00:08:03,369
+and what did it score?
+
+211
+00:08:03,369 --> 00:08:05,916
+Today a registry tracks more than models.
+
+212
+00:08:05,916 --> 00:08:07,048
+Prompts, judges,
+
+213
+00:08:07,048 --> 00:08:08,066
+test datasets,
+
+214
+00:08:08,066 --> 00:08:09,311
+even tool servers.
+
+215
+00:08:09,661 --> 00:08:10,614
+Use aliases,
+
+216
+00:08:10,614 --> 00:08:11,507
+not stages.
+
+217
+00:08:11,507 --> 00:08:14,723
+Instead of moving a model into a production stage,
+
+218
+00:08:14,723 --> 00:08:18,296
+you point a name like champion at one immutable version.
+
+219
+00:08:18,296 --> 00:08:21,511
+Promoting or rolling back is just moving the name.
+
+220
+00:08:22,761 --> 00:08:24,322
+Treat prompts like code.
+
+221
+00:08:24,322 --> 00:08:25,827
+A prompt is a template,
+
+222
+00:08:25,827 --> 00:08:26,831
+its variables,
+
+223
+00:08:26,831 --> 00:08:28,336
+and the model settings,
+
+224
+00:08:28,336 --> 00:08:30,287
+stored outside the application.
+
+225
+00:08:30,287 --> 00:08:32,739
+Every change is a new immutable version.
+
+226
+00:08:32,739 --> 00:08:34,523
+You never edit one in place.
+
+227
+00:08:34,873 --> 00:08:38,066
+The app fetches the prompt by alias and caches it.
+
+228
+00:08:38,066 --> 00:08:40,845
+So moving the alias is an instant rollback,
+
+229
+00:08:40,845 --> 00:08:41,791
+no redeploy.
+
+230
+00:08:41,791 --> 00:08:44,569
+And every trace records the prompt version,
+
+231
+00:08:44,569 --> 00:08:46,993
+so you can slice failures by version.
+
+232
+00:08:48,243 --> 00:08:50,459
+A model card is the label on a model.
+
+233
+00:08:50,459 --> 00:08:52,081
+Short settings at the top,
+
+234
+00:08:52,081 --> 00:08:53,107
+in a few lines.
+
+235
+00:08:53,107 --> 00:08:54,188
+What base model,
+
+236
+00:08:54,188 --> 00:08:54,945
+what data,
+
+237
+00:08:54,945 --> 00:08:55,864
+what licence,
+
+238
+00:08:55,864 --> 00:08:57,323
+what kind of fine tune.
+
+239
+00:08:57,323 --> 00:08:58,458
+Then prose below.
+
+240
+00:08:58,458 --> 00:08:59,485
+What it is for,
+
+241
+00:08:59,485 --> 00:09:00,296
+its limits,
+
+242
+00:09:00,296 --> 00:09:01,539
+how it was trained,
+
+243
+00:09:01,539 --> 00:09:02,511
+how it scored.
+
+244
+00:09:02,861 --> 00:09:06,273
+On Hugging Face the model card is simply the readme file.
+
+245
+00:09:06,273 --> 00:09:09,797
+Writing one forces you to say what your model should not be
+
+246
+00:09:09,797 --> 00:09:10,524
+used for.
+
+247
+00:09:11,774 --> 00:09:13,045
+Now the machines.
+
+248
+00:09:13,045 --> 00:09:17,280
+Infrastructure as code means describing your cloud setup in files.
+
+249
+00:09:17,280 --> 00:09:20,850
+Tools called Terraform and OpenTofu create the network,
+
+250
+00:09:20,850 --> 00:09:21,818
+the cluster,
+
+251
+00:09:21,818 --> 00:09:23,391
+the GPU machine pools,
+
+252
+00:09:23,391 --> 00:09:24,601
+the permissions,
+
+253
+00:09:24,601 --> 00:09:25,811
+and the storage.
+
+254
+00:09:26,161 --> 00:09:27,328
+A second layer,
+
+255
+00:09:27,328 --> 00:09:28,434
+called GitOps,
+
+256
+00:09:28,434 --> 00:09:31,505
+uses a tool like Argo C D or Flux to keep what
+
+257
+00:09:31,505 --> 00:09:34,454
+runs in the cluster matching what is in Git.
+
+258
+00:09:34,454 --> 00:09:35,560
+A third layer,
+
+259
+00:09:35,560 --> 00:09:39,184
+rollouts, does canary releases with automatic rollback.
+
+260
+00:09:40,434 --> 00:09:41,522
+Why this style?
+
+261
+00:09:41,522 --> 00:09:44,727
+Git becomes the source of truth and the audit trail.
+
+262
+00:09:44,727 --> 00:09:47,188
+If someone changes the cluster by hand,
+
+263
+00:09:47,188 --> 00:09:49,363
+the tool notices and puts it back.
+
+264
+00:09:49,363 --> 00:09:51,995
+And a rollback is just reverting a commit.
+
+265
+00:09:52,345 --> 00:09:54,290
+One more rule from the notebook.
+
+266
+00:09:54,290 --> 00:09:57,368
+Keep your model provider keys out of the state files,
+
+267
+00:09:57,368 --> 00:10:00,230
+using the tools' ephemeral and write only values.
+
+268
+00:10:00,230 --> 00:10:02,823
+A leaked state file should never leak a key.
+
+269
+00:10:04,073 --> 00:10:05,997
+Here is a taste of the code,
+
+270
+00:10:05,997 --> 00:10:07,321
+from the notebook.
+
+271
+00:10:07,321 --> 00:10:10,087
+A pool of spot GPU machines for inference.
+
+272
+00:10:10,087 --> 00:10:11,531
+The minimum is zero,
+
+273
+00:10:11,531 --> 00:10:14,177
+so with no traffic there is no GPU bill.
+
+274
+00:10:14,177 --> 00:10:15,620
+The maximum is four.
+
+275
+00:10:15,620 --> 00:10:17,184
+The machines are spot,
+
+276
+00:10:17,184 --> 00:10:19,169
+so cheaper and interruptible.
+
+277
+00:10:19,519 --> 00:10:22,115
+Notice that it ties back to lesson two.
+
+278
+00:10:22,115 --> 00:10:23,202
+Scale to zero,
+
+279
+00:10:23,202 --> 00:10:25,858
+spot, and a GPU taint from lesson three,
+
+280
+00:10:25,858 --> 00:10:27,368
+all in a dozen lines.
+
+281
+00:10:27,368 --> 00:10:32,017
+Check the current provider documentation before using anything like this,
+
+282
+00:10:32,017 --> 00:10:33,707
+because settings change.
+
+283
+00:10:34,957 --> 00:10:36,068
+Now the canary.
+
+284
+00:10:36,068 --> 00:10:37,587
+Even with a good gate,
+
+285
+00:10:37,587 --> 00:10:39,690
+real traffic finds new problems.
+
+286
+00:10:39,690 --> 00:10:43,021
+So you send the new version to a small share of users
+
+287
+00:10:43,021 --> 00:10:47,403
+first, and an automatic check decides whether to continue or roll back.
+
+288
+00:10:47,753 --> 00:10:48,870
+I simulated it.
+
+289
+00:10:48,870 --> 00:10:50,870
+Six hundred requests a minute.
+
+290
+00:10:50,870 --> 00:10:53,106
+The old version fails one percent.
+
+291
+00:10:53,106 --> 00:10:56,047
+The new version is bad and fails five percent.
+
+292
+00:10:56,047 --> 00:10:58,047
+Both rates are my assumptions.
+
+293
+00:10:58,047 --> 00:11:00,811
+An automatic check runs every five minutes,
+
+294
+00:11:00,811 --> 00:11:04,988
+and rolls back if failures are far above what one percent predicts.
+
+295
+00:11:06,238 --> 00:11:08,049
+Release to everyone at once,
+
+296
+00:11:08,049 --> 00:11:11,842
+and about a hundred and fifty bad responses went out before the
+
+297
+00:11:11,842 --> 00:11:14,276
+rollback. A twenty-five percent canary,
+
+298
+00:11:14,276 --> 00:11:16,540
+thirty-eight. A five percent canary,
+
+299
+00:11:16,540 --> 00:11:17,672
+nine point four.
+
+300
+00:11:17,672 --> 00:11:19,087
+A one percent canary,
+
+301
+00:11:19,087 --> 00:11:19,596
+four.
+
+302
+00:11:19,946 --> 00:11:23,465
+The rule of thumb is that the damage scales with the share
+
+303
+00:11:23,465 --> 00:11:24,941
+of traffic you expose.
+
+304
+00:11:24,941 --> 00:11:27,892
+A small canary turns a disaster into a footnote.
+
+305
+00:11:29,142 --> 00:11:30,590
+But small is not free.
+
+306
+00:11:30,590 --> 00:11:32,262
+With a one percent canary,
+
+307
+00:11:32,262 --> 00:11:36,385
+the very first check caught the problem only forty-five percent of the
+
+308
+00:11:36,385 --> 00:11:38,892
+time. There were not enough requests yet.
+
+309
+00:11:38,892 --> 00:11:41,789
+It took about two point seven checks on average.
+
+310
+00:11:42,139 --> 00:11:46,477
+A five percent canary caught it first time seventy-seven percent of the
+
+311
+00:11:46,477 --> 00:11:50,063
+time. Bigger canaries decide faster and expose more users.
+
+312
+00:11:50,063 --> 00:11:53,418
+Pick a share small enough to be safe and big enough to
+
+313
+00:11:53,418 --> 00:11:54,459
+learn quickly.
+
+314
+00:11:55,709 --> 00:11:56,723
+After release,
+
+315
+00:11:56,723 --> 00:11:57,512
+you watch.
+
+316
+00:11:57,512 --> 00:12:00,835
+For language model apps the unit to watch is the trace,
+
+317
+00:12:00,835 --> 00:12:02,243
+one tree per request,
+
+318
+00:12:02,243 --> 00:12:03,821
+showing each model call,
+
+319
+00:12:03,821 --> 00:12:05,961
+each tool call and each retrieval,
+
+320
+00:12:05,961 --> 00:12:07,257
+with time and cost.
+
+321
+00:12:07,607 --> 00:12:10,034
+The tooling market is changing fast.
+
+322
+00:12:10,034 --> 00:12:12,339
+Langfuse was bought by ClickHouse,
+
+323
+00:12:12,339 --> 00:12:13,796
+Promptfoo by OpenAI,
+
+324
+00:12:13,796 --> 00:12:16,465
+and Helicone went into maintenance mode,
+
+325
+00:12:16,465 --> 00:12:18,285
+according to the notebook.
+
+326
+00:12:18,285 --> 00:12:22,168
+So record traces in the open O Tel standard for generative A
+
+327
+00:12:22,168 --> 00:12:24,595
+I, and your backend stays swappable.
+
+328
+00:12:25,845 --> 00:12:28,302
+Graders can run on live traffic too.
+
+329
+00:12:28,302 --> 00:12:31,741
+An online judge samples real traces and scores them,
+
+330
+00:12:31,741 --> 00:12:32,724
+for example,
+
+331
+00:12:32,724 --> 00:12:34,751
+did the answer cite a source,
+
+332
+00:12:34,751 --> 00:12:37,085
+or did the user have to ask again.
+
+333
+00:12:37,085 --> 00:12:39,419
+Scores feed dashboards and alerts.
+
+334
+00:12:39,769 --> 00:12:40,982
+When a trace fails,
+
+335
+00:12:40,982 --> 00:12:42,618
+save it as a new test case.
+
+336
+00:12:42,618 --> 00:12:44,622
+That closes the loop from earlier.
+
+337
+00:12:44,622 --> 00:12:46,522
+Production teaches the test set.
+
+338
+00:12:47,772 --> 00:12:50,733
+For language model apps that train nothing,
+
+339
+00:12:50,733 --> 00:12:54,892
+the idea of continuous training becomes continuous evaluation.
+
+340
+00:12:54,892 --> 00:12:57,538
+Judges score live traces all the time.
+
+341
+00:12:57,538 --> 00:12:59,932
+Prompt optimisers propose changes.
+
+342
+00:12:59,932 --> 00:13:04,091
+Every candidate passes through the gate before an alias moves.
+
+343
+00:13:04,441 --> 00:13:08,389
+A registry hook or an alias change can start the deployment job,
+
+344
+00:13:08,389 --> 00:13:11,466
+which runs a canary with an alarm based rollback.
+
+345
+00:13:11,466 --> 00:13:13,381
+People review the dashboards,
+
+346
+00:13:13,381 --> 00:13:14,543
+not each change.
+
+347
+00:13:15,793 --> 00:13:17,452
+One more thing to watch.
+
+348
+00:13:17,452 --> 00:13:19,468
+Cost. For language model apps,
+
+349
+00:13:19,468 --> 00:13:23,143
+the cost per token and per request deserves its own alarm,
+
+350
+00:13:23,143 --> 00:13:24,210
+next to speed.
+
+351
+00:13:24,210 --> 00:13:28,299
+A prompt change that doubles the input length can double the bill
+
+352
+00:13:28,299 --> 00:13:29,129
+overnight.
+
+353
+00:13:29,479 --> 00:13:31,318
+Record the cost on every trace,
+
+354
+00:13:31,318 --> 00:13:33,262
+and add a cost check to the gate.
+
+355
+00:13:33,262 --> 00:13:35,153
+Lesson eleven goes deep on this.
+
+356
+00:13:36,403 --> 00:13:37,892
+For ShopNest Copilot.
+
+357
+00:13:37,892 --> 00:13:39,738
+Prompts live in a registry,
+
+358
+00:13:39,738 --> 00:13:42,180
+with versions and a production alias.
+
+359
+00:13:42,180 --> 00:13:44,742
+Every pull request runs the unit tests,
+
+360
+00:13:44,742 --> 00:13:47,362
+a golden set of tickets scored by slice,
+
+361
+00:13:47,362 --> 00:13:48,613
+and a cost check.
+
+362
+00:13:48,963 --> 00:13:50,583
+Infrastructure is code.
+
+363
+00:13:50,583 --> 00:13:53,763
+New versions go to five percent of traffic first,
+
+364
+00:13:53,763 --> 00:13:55,623
+with an automatic rollback.
+
+365
+00:13:55,623 --> 00:13:58,023
+Traces and online judges watch live,
+
+366
+00:13:58,023 --> 00:14:00,783
+and failed traces become new golden cases.
+
+367
+00:14:02,033 --> 00:14:03,844
+Four words to carry forward.
+
+368
+00:14:03,844 --> 00:14:04,637
+Eval gate:
+
+369
+00:14:04,637 --> 00:14:07,410
+an automatic test that blocks a worse change.
+
+370
+00:14:07,410 --> 00:14:08,994
+Champion and challenger:
+
+371
+00:14:08,994 --> 00:14:11,541
+the current version and the proposed one.
+
+372
+00:14:11,891 --> 00:14:14,236
+Canary: sending a little traffic first.
+
+373
+00:14:14,236 --> 00:14:14,999
+And trace:
+
+374
+00:14:14,999 --> 00:14:17,453
+the record of everything one request did.
+
+375
+00:14:18,703 --> 00:14:19,915
+Interview corner.
+
+376
+00:14:19,915 --> 00:14:22,570
+Asked how you ship a prompt change safely,
+
+377
+00:14:22,570 --> 00:14:23,724
+say: version it,
+
+378
+00:14:23,724 --> 00:14:27,591
+run an eval gate that checks the overall score and every slice,
+
+379
+00:14:27,591 --> 00:14:31,400
+canary it on a small share of traffic with automatic rollback,
+
+380
+00:14:31,400 --> 00:14:32,613
+and watch traces.
+
+381
+00:14:32,613 --> 00:14:33,709
+In my toy gate,
+
+382
+00:14:33,709 --> 00:14:37,518
+a change that raised the average by two points was blocked for
+
+383
+00:14:37,518 --> 00:14:39,250
+dropping refunds by fifty.
+
+384
+00:14:39,600 --> 00:14:42,359
+Asked why run evaluations several times,
+
+385
+00:14:42,359 --> 00:14:44,178
+say: model output varies,
+
+386
+00:14:44,178 --> 00:14:47,126
+and reliability falls quickly with repeats.
+
+387
+00:14:47,126 --> 00:14:51,390
+A ninety percent agent passes five runs in a row only fifty-nine
+
+388
+00:14:51,390 --> 00:14:52,895
+percent of the time.
+
+389
+00:14:54,145 --> 00:14:54,917
+Your turn.
+
+390
+00:14:54,917 --> 00:14:57,453
+The zip for this lesson has three scripts.
+
+391
+00:14:57,453 --> 00:14:58,445
+The eval gate,
+
+392
+00:14:58,445 --> 00:14:59,878
+the trials calculator,
+
+393
+00:14:59,878 --> 00:15:01,477
+and the canary simulator.
+
+394
+00:15:01,477 --> 00:15:04,068
+Change the keyword list so the gate passes,
+
+395
+00:15:04,068 --> 00:15:05,777
+or change the canary share.
+
+396
+00:15:06,127 --> 00:15:09,877
+Try adding a keyword to refund tickets that fixes the problem,
+
+397
+00:15:09,877 --> 00:15:11,696
+and watch the gate go green.
+
+398
+00:15:11,696 --> 00:15:15,105
+One changed number teaches more than an hour of reading.
+
+399
+00:15:16,355 --> 00:15:18,094
+Recap. Ship the pipeline,
+
+400
+00:15:18,094 --> 00:15:19,473
+not just the model.
+
+401
+00:15:19,473 --> 00:15:21,332
+Run a gate on every change,
+
+402
+00:15:21,332 --> 00:15:22,112
+by slice,
+
+403
+00:15:22,112 --> 00:15:24,091
+because averages hide damage.
+
+404
+00:15:24,091 --> 00:15:27,989
+My toy gate blocked a plus two point change that cost refunds
+
+405
+00:15:27,989 --> 00:15:29,008
+fifty points.
+
+406
+00:15:29,008 --> 00:15:30,387
+Run several trials,
+
+407
+00:15:30,387 --> 00:15:34,945
+since a ninety percent agent passes five runs only fifty-nine percent of
+
+408
+00:15:34,945 --> 00:15:35,724
+the time.
+
+409
+00:15:36,074 --> 00:15:37,151
+Move aliases,
+
+410
+00:15:37,151 --> 00:15:37,975
+not code,
+
+411
+00:15:37,975 --> 00:15:39,812
+to promote and roll back.
+
+412
+00:15:39,812 --> 00:15:40,889
+Canary small,
+
+413
+00:15:40,889 --> 00:15:45,007
+and the damage in my simulation fell from about a hundred and
+
+414
+00:15:45,007 --> 00:15:47,034
+fifty bad responses to nine.
+
+415
+00:15:47,034 --> 00:15:48,048
+Next lesson:
+
+416
+00:15:48,048 --> 00:15:50,012
+G E N A I app architecture.
+
+417
+00:15:50,012 --> 00:15:50,645
+R A G,
+
+418
+00:15:50,645 --> 00:15:51,976
+agents and tools.
+
+419
+00:15:53,226 --> 00:15:54,502
+In the next lesson:
+
+420
+00:15:54,502 --> 00:15:55,833
+generative A I apps.
+
+421
+00:15:55,833 --> 00:15:57,054
+Starting with rag,
+
+422
+00:15:57,054 --> 00:15:59,051
+from documents to cited answers.
+
+423
+00:15:59,401 --> 00:16:00,993
+Subscribe so you don't miss it.
+
+424
+00:16:00,993 --> 00:16:02,267
+See you in the notebook.
+
