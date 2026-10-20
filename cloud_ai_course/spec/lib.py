@@ -415,7 +415,10 @@ def preview(L, kind, times=None):
     return [f'{VID}/preview_{V["name"]}_{t}.png' for t in ts]
 
 # ------------------------------------------------------------------ COVERS
-COVER_CSS = open(f'{VID}/ms01/thumbs4.html').read().split('<style>')[1].split('</style>')[0]
+try:
+    COVER_CSS = open(f'{VID}/ms01/thumbs4.html').read().split('<style>')[1].split('</style>')[0]
+except FileNotFoundError:
+    COVER_CSS = ''  # old cover style not in the kit; CAI covers come from caithumb/gen2.py
 
 def build_covers(L):
     T = L['thumb']

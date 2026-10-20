@@ -56,3 +56,5 @@ L = dict(
    tags='docker layers explained, docker image size, kubernetes gpu, gang scheduling, kueue, bake vs mount model weights, nvidia container toolkit, mig mps time slicing, ai deployment kubernetes, cloud for ai engineers, the code notebook',
    pinned="The layer experiment uses real bytes and hashes with a simulated registry, and the gang result is a simulation, both labelled in the video. 📊\n\nQuestion for you 👇\nWhich surprised you more: 1 MB vs 401 MB for the same change, or 95% deadlock?"),
 )
+
+import interview; L['notes'] = interview.add(L['notes'], L['num'])

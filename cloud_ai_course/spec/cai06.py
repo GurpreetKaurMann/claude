@@ -55,3 +55,5 @@ L = dict(
    tags='kv cache explained, llm inference optimization, continuous batching, vllm tutorial, prefill vs decode, ttft, quantization llm, speculative decoding, how to serve llm, llm latency, cloud for ai engineers, the code notebook',
    pinned="Speed tests use a small random-weight model on a CPU (timing, not quality). Batching and speculation are simulations with assumed numbers. 📊\n\nQuestion for you 👇\nWhich surprised you more: a 12x speed-up from caching, or plain 4-bit rounding giving 51% error?"),
 )
+
+import interview; L['notes'] = interview.add(L['notes'], L['num'])

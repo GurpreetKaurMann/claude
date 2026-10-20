@@ -55,3 +55,5 @@ L = dict(
    tags='finops for ai, gpu utilization, real price of a gpu, llm api cost, prompt caching, self host vs api, break even calculator, cost per resolved ticket, ai cost optimization, cloud for ai engineers, the code notebook',
    pinned="Prices are the notebook's approximate Oct 2026 list prices and change often, the cache test uses a toy cache I wrote, and the gateway logs are invented. 📊\\n\\nQuestion for you 👇\\nWhat is your biggest AI cost: GPUs sitting idle, or tokens you send again and again?"),
 )
+
+import interview; L['notes'] = interview.add(L['notes'], L['num'])

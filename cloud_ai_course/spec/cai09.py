@@ -55,3 +55,5 @@ L = dict(
    tags='ai agents explained, idempotency key, agent crash recovery, retry with jitter, circuit breaker, mcp protocol, a2a protocol, prompt caching cost, agent loop cost, durable execution, cloud for ai engineers, the code notebook',
    pinned="The agent loop uses a scripted stand-in model, the retry and breaker results are simulations with assumed numbers, and the token costs are arithmetic with assumed sizes. 📊\\n\\nQuestion for you 👇\\nWhich surprised you more: a restart refunding twice, or jitter turning 211 s into 9.9 s?"),
 )
+
+import interview; L['notes'] = interview.add(L['notes'], L['num'])

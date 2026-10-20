@@ -83,3 +83,5 @@ L = dict(
    tags='will my model fit on a gpu, gpu memory explained, kv cache explained, llm memory, h100 vs h200, how much gpu memory do I need, hbm memory bandwidth, batching llm, cloud for ai engineers, ai infrastructure for beginners, the code notebook',
    pinned="Every measured number in this lesson came from code that ran on a CPU, and every GPU figure is labelled as a vendor number from Oct 2026. 📊\n\nQuestion for you 👇\nWhich surprised you more: the chats needing more memory than the model, or 4x the data taking 8x the time?"),
 )
+
+import interview; L['notes'] = interview.add(L['notes'], L['num'])

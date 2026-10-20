@@ -55,3 +55,5 @@ L = dict(
    tags='small files problem, data sharding, object storage explained, s3 egress cost, vector database memory, hnsw explained, quantization embeddings, pgvector, lakehouse, delta lake time travel, cloud for ai engineers, the code notebook',
    pinned="File reads and vector tests were measured on the build machine (synthetic vectors). The object store timing is a model with assumed numbers. 📊\n\nQuestion for you 👇\nWhich surprised you more: 25x slower for small files, or 98% recall at a quarter of the vector memory?"),
 )
+
+import interview; L['notes'] = interview.add(L['notes'], L['num'])

@@ -55,3 +55,5 @@ L = dict(
    tags='ai engineer roadmap, cloud ai roadmap, how to become an ai engineer, mlops roadmap, aws ai certification 2026, kubernetes for ai, gpu cost, terraform destroy, cloud for ai engineers, the code notebook',
    pinned="Prices, exam codes and posting figures are dated notebook estimates (Oct 2026), and the stage order is my own synthesis. 🎓\\n\\nQuestion for you 👇\\nWhich stop are you starting at, and what project will you build first?"),
 )
+
+import interview; L['notes'] = interview.add(L['notes'], L['num'])

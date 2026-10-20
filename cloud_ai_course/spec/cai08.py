@@ -54,3 +54,5 @@ L = dict(
    tags='rag explained, rag chunk size, hybrid search, reciprocal rank fusion, rag evaluation, retrieval augmented generation tutorial, rag vs long context, contextual retrieval, bm25 vs embeddings, rag failure modes, cloud for ai engineers, the code notebook',
    pinned="The retrieval test is real text and real questions, but the vector side is a stand-in and 24 questions is small: each question is 4.2 points. 📊\\n\\nQuestion for you 👇\\nWhich surprised you more: fusion not winning, or a simple title prefix barely helping?"),
 )
+
+import interview; L['notes'] = interview.add(L['notes'], L['num'])

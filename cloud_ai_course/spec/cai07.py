@@ -55,3 +55,5 @@ L = dict(
    tags='eval gate, llmops explained, mlops levels, how to test llm prompts, pass at k, canary release, gitops for ml, prompt versioning, model registry, llm evaluation ci, cloud for ai engineers, the code notebook',
    pinned="The eval gate runs a real check on a toy keyword model with synthetic tickets. The trials and canary results are simulations with assumed rates, all labelled in the video. 📊\\n\\nQuestion for you 👇\\nWhich surprised you more: a +2 point change blocked for a -50 slice, or a 90% agent passing 5 runs only 59% of the time?"),
 )
+
+import interview; L['notes'] = interview.add(L['notes'], L['num'])

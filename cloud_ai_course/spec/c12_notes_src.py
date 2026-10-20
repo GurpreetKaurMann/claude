@@ -17,7 +17,7 @@ NOTES = [
   ('diagram', 'weeks', 56, 1000, 300),
   ('p', '<span class="small">12-week fast track: skip or merge the four starred weeks (quantisation, agents + MCP, observability, efficiency).</span>')],
  [('h2', '6', 'What the path costs'),
-  ('diagram', 'stagecost', 56, 1000, 320),
+  ('diagram', 'stagecost', 64, 1000, 320),
   ('table', ['', 'Estimate'], [['sum of project estimates (my addition)', '$32 to $155 before credits'], ['stops 1-5 only', '$7 to $57'], ['notebook estimate, whole path', '<b>about $150-250</b> out of pocket, if you tear down'], ['new-account credits (2-3-2)', 'AWS $200 / 12 months · GCP $300 / 90 days · Azure $200 / 30 days'], ['free GPU notebooks', 'Kaggle about 30 GPU-hours a week']]),
   ('p', '<span class="small">Budget the higher figure. Spend credits on CPU, networking and Kubernetes stops; use free notebooks for learning-size GPU work; rent marketplace GPUs for stops 3, 5 and 6.</span>')],
  [('h2', '7', 'The forgotten GPU'),

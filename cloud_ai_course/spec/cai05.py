@@ -55,3 +55,5 @@ L = dict(
    tags='how much gpu memory to train llm, 16 bytes per parameter, adam optimizer memory, zero fsdp explained, gradient checkpointing, lora memory, pipeline parallelism bubble, tensor parallelism, 6nd flops, training cost, cloud for ai engineers, the code notebook',
    pinned="The ledger and LoRA numbers were measured on a small real model on a CPU. Big-model numbers are arithmetic from the notebook's formulas, and the bubble is a simulation. 📊\n\nQuestion for you 👇\nWhich surprised you more: weights being only 1/8 of the training bill, or LoRA needing 100x less optimiser memory?"),
 )
+
+import interview; L['notes'] = interview.add(L['notes'], L['num'])

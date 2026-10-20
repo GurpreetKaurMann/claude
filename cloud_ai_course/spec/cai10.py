@@ -55,3 +55,5 @@ L = dict(
    tags='prompt injection explained, llm security, egress allowlist, lethal trifecta, rule of two, owasp llm top 10, rag permissions, least privilege iam, pii redaction, ai agent security, cloud for ai engineers, the code notebook',
    pinned="The injection test uses a deliberately gullible stand-in model with synthetic data, the policy checker is a simplified teaching version, and the PII test uses 30 made-up strings. 📊\\n\\nQuestion for you 👇\\nWhich surprised you more: a filter stopping only 3 of 12, or 83% of RAG results belonging to someone else?"),
 )
+
+import interview; L['notes'] = interview.add(L['notes'], L['num'])

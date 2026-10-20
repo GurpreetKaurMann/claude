@@ -57,3 +57,5 @@ L = dict(
    tags='spot instances explained, gpu cost, how to rent gpus, checkpointing, reserved instances vs spot, scale to zero, ai infrastructure cost, tpu vs gpu, trainium, h100 price, cloud for ai engineers, the code notebook',
    pinned="Every spot and scale to zero number here comes from a simulation with assumed rates, and every price is a vendor figure from Oct 2026. 📊\n\nQuestion for you 👇\nWhich surprised you more: a job that never finishes without saves, or saving too often costing more than on-demand?"),
 )
+
+import interview; L['notes'] = interview.add(L['notes'], L['num'])
