@@ -1,0 +1,1620 @@
+1
+00:00:00,500 --> 00:00:04,451
+A seventy billion parameter model is a hundred and forty gigabytes of
+
+2
+00:00:04,451 --> 00:00:08,239
+weights. So training it should need a hundred and forty gigabytes,
+
+3
+00:00:08,239 --> 00:00:09,159
+right? Wrong.
+
+4
+00:00:09,159 --> 00:00:10,891
+Training needs one thousand,
+
+5
+00:00:10,891 --> 00:00:12,894
+one hundred and twenty gigabytes,
+
+6
+00:00:12,894 --> 00:00:14,031
+eight times more.
+
+7
+00:00:14,381 --> 00:00:15,946
+No single GPU holds that.
+
+8
+00:00:15,946 --> 00:00:18,375
+So how do people train big models at all?
+
+9
+00:00:18,375 --> 00:00:19,833
+This lesson answers it.
+
+10
+00:00:19,833 --> 00:00:21,237
+Where the memory goes,
+
+11
+00:00:21,237 --> 00:00:22,316
+how to split it,
+
+12
+00:00:22,316 --> 00:00:23,288
+what it costs,
+
+13
+00:00:23,288 --> 00:00:25,123
+and what breaks along the way.
+
+14
+00:00:26,373 --> 00:00:29,809
+Welcome to lesson five of the cloud for A I engineers course,
+
+15
+00:00:29,809 --> 00:00:31,131
+on The Code Notebook.
+
+16
+00:00:31,481 --> 00:00:34,615
+The handwritten notes and the code for this lesson are linked in
+
+17
+00:00:34,615 --> 00:00:35,537
+the description.
+
+18
+00:00:36,787 --> 00:00:39,223
+In the earlier lessons we rented chips,
+
+19
+00:00:39,223 --> 00:00:41,489
+packed containers and fed them data.
+
+20
+00:00:41,489 --> 00:00:42,453
+Now we train.
+
+21
+00:00:42,453 --> 00:00:44,946
+This is the most expensive thing in A I,
+
+22
+00:00:44,946 --> 00:00:46,759
+so it pays to understand it.
+
+23
+00:00:47,109 --> 00:00:48,535
+Plan for the lesson.
+
+24
+00:00:48,535 --> 00:00:49,842
+The memory ledger,
+
+25
+00:00:49,842 --> 00:00:51,744
+how to share it across GPUs,
+
+26
+00:00:51,744 --> 00:00:54,003
+how to save memory by recomputing,
+
+27
+00:00:54,003 --> 00:00:56,083
+how many GPU hours a run needs,
+
+28
+00:00:56,083 --> 00:00:57,866
+the ways to split a model,
+
+29
+00:00:57,866 --> 00:00:58,817
+the network,
+
+30
+00:00:58,817 --> 00:01:00,243
+and what goes wrong.
+
+31
+00:01:00,243 --> 00:01:03,452
+Some of it is measured on a small model on my CPU.
+
+32
+00:01:03,452 --> 00:01:05,948
+The rest is arithmetic and simulation,
+
+33
+00:01:05,948 --> 00:01:06,721
+labelled.
+
+34
+00:01:07,971 --> 00:01:09,414
+First, what is training?
+
+35
+00:01:09,414 --> 00:01:11,476
+Think of a teacher marking homework.
+
+36
+00:01:11,476 --> 00:01:12,919
+The model makes a guess.
+
+37
+00:01:12,919 --> 00:01:14,414
+That is the forward pass.
+
+38
+00:01:14,414 --> 00:01:16,064
+We measure how wrong it was.
+
+39
+00:01:16,064 --> 00:01:17,868
+That number is called the loss.
+
+40
+00:01:18,218 --> 00:01:20,093
+Then comes the backward pass.
+
+41
+00:01:20,093 --> 00:01:23,842
+We work out which numbers inside the model were most to blame.
+
+42
+00:01:23,842 --> 00:01:26,341
+Those blame scores are called gradients.
+
+43
+00:01:26,341 --> 00:01:29,693
+And finally the optimiser nudges every weight a little,
+
+44
+00:01:29,693 --> 00:01:32,193
+in the direction that reduces the error.
+
+45
+00:01:32,193 --> 00:01:33,840
+Repeat billions of times.
+
+46
+00:01:35,090 --> 00:01:36,166
+During training,
+
+47
+00:01:36,166 --> 00:01:37,781
+four things sit in memory.
+
+48
+00:01:37,781 --> 00:01:39,234
+The weights themselves.
+
+49
+00:01:39,234 --> 00:01:40,202
+The gradients,
+
+50
+00:01:40,202 --> 00:01:41,224
+one per weight.
+
+51
+00:01:41,224 --> 00:01:42,677
+The optimiser's memory,
+
+52
+00:01:42,677 --> 00:01:44,453
+and I will explain that next.
+
+53
+00:01:44,453 --> 00:01:45,529
+And activations,
+
+54
+00:01:45,529 --> 00:01:49,403
+the in between results saved during the forward pass so the backward
+
+55
+00:01:49,403 --> 00:01:50,587
+pass can use them.
+
+56
+00:01:50,937 --> 00:01:53,869
+The first three scale with the number of parameters.
+
+57
+00:01:53,869 --> 00:01:56,852
+Activations scale with how many tokens are in flight.
+
+58
+00:01:56,852 --> 00:02:00,569
+Together they are why training needs so much more than just storing
+
+59
+00:02:00,569 --> 00:02:01,302
+the model.
+
+60
+00:02:02,552 --> 00:02:05,053
+Here is the ledger for the standard recipe.
+
+61
+00:02:05,053 --> 00:02:06,969
+Weights in the half size format,
+
+62
+00:02:06,969 --> 00:02:07,714
+two bytes.
+
+63
+00:02:07,714 --> 00:02:09,044
+Gradients, two bytes.
+
+64
+00:02:09,044 --> 00:02:10,268
+Then the optimiser.
+
+65
+00:02:10,268 --> 00:02:11,226
+Most use Adam,
+
+66
+00:02:11,226 --> 00:02:13,301
+which keeps two numbers per weight,
+
+67
+00:02:13,301 --> 00:02:15,323
+a running average of the gradient,
+
+68
+00:02:15,323 --> 00:02:16,494
+and of its square,
+
+69
+00:02:16,494 --> 00:02:17,558
+four bytes each.
+
+70
+00:02:17,908 --> 00:02:21,771
+Adam also keeps a full precision master copy of the weights,
+
+71
+00:02:21,771 --> 00:02:22,676
+four bytes,
+
+72
+00:02:22,676 --> 00:02:25,634
+because tiny nudges vanish in half precision.
+
+73
+00:02:25,634 --> 00:02:29,255
+Two plus two plus twelve is sixteen bytes per parameter.
+
+74
+00:02:29,605 --> 00:02:30,254
+The weights,
+
+75
+00:02:30,254 --> 00:02:31,511
+the part you thought about,
+
+76
+00:02:31,511 --> 00:02:32,890
+are only a eighth of the bill.
+
+77
+00:02:34,140 --> 00:02:36,157
+Let me check that on a real model.
+
+78
+00:02:36,157 --> 00:02:40,191
+I built a small network with thirty-three and a half million parameters,
+
+79
+00:02:40,191 --> 00:02:42,102
+ran one training step with Adam,
+
+80
+00:02:42,102 --> 00:02:44,385
+and added up the bytes of every tensor.
+
+81
+00:02:44,735 --> 00:02:47,256
+On a CPU everything is full precision,
+
+82
+00:02:47,256 --> 00:02:49,056
+so weights are four bytes,
+
+83
+00:02:49,056 --> 00:02:50,197
+gradients four,
+
+84
+00:02:50,197 --> 00:02:52,238
+and Adam's two memories eight.
+
+85
+00:02:52,238 --> 00:02:55,239
+Total, sixteen point zero bytes per parameter,
+
+86
+00:02:55,239 --> 00:02:57,040
+exactly. Different recipe,
+
+87
+00:02:57,040 --> 00:02:57,940
+same total.
+
+88
+00:02:59,190 --> 00:03:00,173
+Now scale it.
+
+89
+00:03:00,173 --> 00:03:04,975
+Sixteen bytes times seven billion parameters is a hundred and twelve gigabytes.
+
+90
+00:03:04,975 --> 00:03:06,132
+Seventy billion,
+
+91
+00:03:06,132 --> 00:03:07,868
+eleven hundred and twenty.
+
+92
+00:03:07,868 --> 00:03:09,835
+Four hundred and five billion,
+
+93
+00:03:09,835 --> 00:03:11,917
+nearly six and a half terabytes.
+
+94
+00:03:12,267 --> 00:03:16,311
+An eighty gigabyte H one hundred cannot hold even the seven billion
+
+95
+00:03:16,311 --> 00:03:17,848
+model's training state.
+
+96
+00:03:17,848 --> 00:03:19,158
+Before activations,
+
+97
+00:03:19,158 --> 00:03:20,582
+before anything else.
+
+98
+00:03:20,582 --> 00:03:21,664
+So we share it.
+
+99
+00:03:22,914 --> 00:03:25,171
+The trick is called sharding,
+
+100
+00:03:25,171 --> 00:03:27,361
+with names ZeRO and F S D P.
+
+101
+00:03:27,361 --> 00:03:30,371
+Instead of every GPU keeping everything,
+
+102
+00:03:30,371 --> 00:03:32,218
+each GPU keeps a slice.
+
+103
+00:03:32,218 --> 00:03:35,844
+The first stage shards only the optimiser memory.
+
+104
+00:03:35,844 --> 00:03:38,512
+The next also shards the gradients.
+
+105
+00:03:38,862 --> 00:03:41,416
+The last stage shards the weights too.
+
+106
+00:03:41,416 --> 00:03:44,516
+For a seventy billion model on sixty-four GPUs,
+
+107
+00:03:44,516 --> 00:03:48,711
+the per GPU share falls from eleven hundred and twenty gigabytes,
+
+108
+00:03:48,711 --> 00:03:50,170
+to two ninety-three,
+
+109
+00:03:50,170 --> 00:03:52,115
+to a hundred and fifty-five,
+
+110
+00:03:52,115 --> 00:03:54,547
+and finally to seventeen and a half.
+
+111
+00:03:54,897 --> 00:03:57,609
+That last number fits an eighty gigabyte card.
+
+112
+00:03:57,609 --> 00:03:59,561
+The earlier stages still do not.
+
+113
+00:04:00,811 --> 00:04:04,152
+Why do the first two stages not work for seventy billion?
+
+114
+00:04:04,152 --> 00:04:07,383
+They still keep a full copy of the half size weights on
+
+115
+00:04:07,383 --> 00:04:08,150
+every GPU.
+
+116
+00:04:08,150 --> 00:04:11,600
+That is a hundred and forty gigabytes before anything else.
+
+117
+00:04:11,950 --> 00:04:13,953
+Only the full sharding stage,
+
+118
+00:04:13,953 --> 00:04:15,955
+called ZeRO three or F S D P,
+
+119
+00:04:15,955 --> 00:04:17,837
+splits the weights as well.
+
+120
+00:04:17,837 --> 00:04:20,143
+The price is more network traffic,
+
+121
+00:04:20,143 --> 00:04:23,602
+about one and a half times a plain data parallel run,
+
+122
+00:04:23,602 --> 00:04:26,819
+because the weights must be gathered when needed.
+
+123
+00:04:28,069 --> 00:04:29,384
+Now the fourth thing,
+
+124
+00:04:29,384 --> 00:04:31,541
+activations. During the forward pass,
+
+125
+00:04:31,541 --> 00:04:34,014
+every layer's in between results are saved,
+
+126
+00:04:34,014 --> 00:04:36,171
+because the backward pass needs them.
+
+127
+00:04:36,171 --> 00:04:38,276
+They grow with the number of tokens,
+
+128
+00:04:38,276 --> 00:04:39,486
+and with attention,
+
+129
+00:04:39,486 --> 00:04:42,485
+they can grow with the square of the sequence length.
+
+130
+00:04:42,835 --> 00:04:45,725
+That is why long context training is so hungry.
+
+131
+00:04:45,725 --> 00:04:50,032
+The notebook's worked example for a seventy billion class model at eight
+
+132
+00:04:50,032 --> 00:04:54,283
+thousand tokens is about one point nine terabytes of activations if you
+
+133
+00:04:54,283 --> 00:04:55,416
+keep everything,
+
+134
+00:04:55,416 --> 00:04:59,950
+against about twenty-three gigabytes with recomputation and tensor parallel.
+
+135
+00:04:59,950 --> 00:05:04,030
+A technique called flash attention avoids storing the biggest piece,
+
+136
+00:05:04,030 --> 00:05:07,260
+and the standard trick for the rest is recomputation.
+
+137
+00:05:08,510 --> 00:05:11,771
+Recomputation, also called gradient checkpointing,
+
+138
+00:05:11,771 --> 00:05:12,676
+is a trade.
+
+139
+00:05:12,676 --> 00:05:14,669
+Keep only each block's input.
+
+140
+00:05:14,669 --> 00:05:17,990
+When the backward pass needs the inside of a block,
+
+141
+00:05:17,990 --> 00:05:20,405
+run that block's forward pass again.
+
+142
+00:05:20,755 --> 00:05:23,227
+You spend extra compute to save memory.
+
+143
+00:05:23,227 --> 00:05:24,262
+I measured it.
+
+144
+00:05:24,262 --> 00:05:25,297
+Twelve blocks,
+
+145
+00:05:25,297 --> 00:05:26,677
+two thousand tokens,
+
+146
+00:05:26,677 --> 00:05:27,942
+on one CPU thread.
+
+147
+00:05:27,942 --> 00:05:30,242
+Each setting ran in its own process,
+
+148
+00:05:30,242 --> 00:05:32,312
+so I could read its peak memory.
+
+149
+00:05:32,312 --> 00:05:33,864
+The machine was shared,
+
+150
+00:05:33,864 --> 00:05:35,302
+so timings are noisy.
+
+151
+00:05:36,552 --> 00:05:37,816
+Keeping everything,
+
+152
+00:05:37,816 --> 00:05:41,443
+the activations took seven hundred and ninety-three megabytes.
+
+153
+00:05:41,443 --> 00:05:42,707
+With recomputation,
+
+154
+00:05:42,707 --> 00:05:44,466
+four hundred and twenty-six.
+
+155
+00:05:44,466 --> 00:05:45,290
+About half.
+
+156
+00:05:45,640 --> 00:05:49,219
+The step time rose from five point six seconds to six point
+
+157
+00:05:49,219 --> 00:05:51,492
+nine. A little under a quarter more.
+
+158
+00:05:51,842 --> 00:05:55,599
+Half the activation memory for a fifth to a quarter more time.
+
+159
+00:05:55,599 --> 00:05:59,185
+The notebook's rule of thumb is up to a third more compute,
+
+160
+00:05:59,185 --> 00:06:00,551
+so mine is in range.
+
+161
+00:06:01,801 --> 00:06:02,702
+Now compute.
+
+162
+00:06:02,702 --> 00:06:03,604
+A good rule:
+
+163
+00:06:03,604 --> 00:06:07,886
+training a model needs about six times the parameters times the training
+
+164
+00:06:07,886 --> 00:06:10,139
+tokens in floating point operations.
+
+165
+00:06:10,139 --> 00:06:11,773
+Two for the forward pass,
+
+166
+00:06:11,773 --> 00:06:13,238
+four for the backward,
+
+167
+00:06:13,238 --> 00:06:14,815
+per parameter per token.
+
+168
+00:06:15,165 --> 00:06:19,599
+Those operations run on GPUs at a fraction of their peak speed.
+
+169
+00:06:19,599 --> 00:06:21,783
+The fraction is called M F U,
+
+170
+00:06:21,783 --> 00:06:23,637
+model flops utilisation.
+
+171
+00:06:23,637 --> 00:06:28,402
+Well tuned dense runs on H one hundreds reach roughly thirty-five to
+
+172
+00:06:28,402 --> 00:06:29,924
+forty-five percent.
+
+173
+00:06:31,174 --> 00:06:33,091
+Let us do a worked example.
+
+174
+00:06:33,091 --> 00:06:36,617
+A seven billion model trained on two trillion tokens.
+
+175
+00:06:36,617 --> 00:06:41,071
+Six times seven billion times two trillion is eight point four times
+
+176
+00:06:41,071 --> 00:06:43,360
+ten to the twenty-two operations.
+
+177
+00:06:43,710 --> 00:06:48,941
+An H one hundred peaks near nine hundred and eighty-nine trillion operations
+
+178
+00:06:48,941 --> 00:06:49,791
+a second.
+
+179
+00:06:49,791 --> 00:06:51,556
+At forty percent M F U,
+
+180
+00:06:51,556 --> 00:06:53,583
+that is about four hundred.
+
+181
+00:06:53,583 --> 00:06:57,899
+Divide, and the run needs about fifty-nine thousand GPU hours.
+
+182
+00:06:57,899 --> 00:07:00,449
+On a thousand and twenty-four GPUs,
+
+183
+00:07:00,449 --> 00:07:02,018
+two point four days.
+
+184
+00:07:02,368 --> 00:07:04,916
+At an assumed two dollars per GPU hour,
+
+185
+00:07:04,916 --> 00:07:07,879
+about a hundred and eighteen thousand dollars.
+
+186
+00:07:07,879 --> 00:07:09,478
+Real prices vary a lot.
+
+187
+00:07:10,728 --> 00:07:12,420
+One warning about M F U.
+
+188
+00:07:12,420 --> 00:07:15,018
+It depends on which peak you divide by.
+
+189
+00:07:15,018 --> 00:07:18,824
+Run in a smaller number format and the chip's peak doubles,
+
+190
+00:07:18,824 --> 00:07:21,482
+so the same run looks half as efficient.
+
+191
+00:07:21,482 --> 00:07:25,107
+Compare M F U only between runs that use the same number
+
+192
+00:07:25,107 --> 00:07:25,771
+format.
+
+193
+00:07:26,121 --> 00:07:27,400
+Also quote M F U,
+
+194
+00:07:27,400 --> 00:07:28,253
+not H F U.
+
+195
+00:07:28,253 --> 00:07:30,567
+The second counts recomputed work,
+
+196
+00:07:30,567 --> 00:07:34,830
+so recomputation makes it look better while the useful work is the
+
+197
+00:07:34,830 --> 00:07:36,596
+same. As a reverse check,
+
+198
+00:07:36,596 --> 00:07:41,163
+DeepSeek reported about two point eight million GPU hours for its large
+
+199
+00:07:41,163 --> 00:07:45,122
+model, which works out to roughly a third of the chip's peak.
+
+200
+00:07:46,372 --> 00:07:48,617
+How many tokens should you train on?
+
+201
+00:07:48,617 --> 00:07:53,333
+A famous study called Chinchilla suggested about twenty tokens per parameter for
+
+202
+00:07:53,333 --> 00:07:55,747
+the best use of a fixed compute budget.
+
+203
+00:07:56,097 --> 00:07:59,085
+But today's models train far longer on purpose.
+
+204
+00:07:59,085 --> 00:08:03,536
+Llama three's biggest model saw about thirty-eight tokens per parameter,
+
+205
+00:08:03,536 --> 00:08:07,637
+and a seven billion model on two trillion tokens sees nearly three
+
+206
+00:08:07,637 --> 00:08:08,984
+hundred. A smaller,
+
+207
+00:08:08,984 --> 00:08:12,147
+longer trained model is cheaper to run afterwards.
+
+208
+00:08:13,397 --> 00:08:16,385
+Sharding the state is one way to share the work.
+
+209
+00:08:16,385 --> 00:08:19,430
+There are four main ways to split a training job.
+
+210
+00:08:19,430 --> 00:08:20,464
+Data parallel,
+
+211
+00:08:20,464 --> 00:08:23,796
+where every GPU runs the same model on different data.
+
+212
+00:08:23,796 --> 00:08:24,945
+Tensor parallel,
+
+213
+00:08:24,945 --> 00:08:27,933
+where the matrices inside each layer are cut up.
+
+214
+00:08:28,283 --> 00:08:29,526
+Pipeline parallel,
+
+215
+00:08:29,526 --> 00:08:31,728
+where layers are split into stages,
+
+216
+00:08:31,728 --> 00:08:33,197
+like an assembly line.
+
+217
+00:08:33,197 --> 00:08:34,552
+And expert parallel,
+
+218
+00:08:34,552 --> 00:08:36,586
+for models made of many experts.
+
+219
+00:08:36,586 --> 00:08:39,014
+Big runs combine three or four at once.
+
+220
+00:08:39,364 --> 00:08:41,087
+Each one cuts a different thing,
+
+221
+00:08:41,087 --> 00:08:43,816
+so each one sends different traffic over the network.
+
+222
+00:08:45,066 --> 00:08:47,110
+Tensor parallel is the chattiest.
+
+223
+00:08:47,110 --> 00:08:47,994
+Every layer,
+
+224
+00:08:47,994 --> 00:08:49,375
+forward and backward,
+
+225
+00:08:49,375 --> 00:08:52,027
+the GPUs must combine their partial results,
+
+226
+00:08:52,027 --> 00:08:53,961
+and the next step waits for it.
+
+227
+00:08:53,961 --> 00:08:56,336
+That traffic sits on the critical path.
+
+228
+00:08:56,686 --> 00:09:00,107
+So tensor parallel belongs only on the fastest link,
+
+229
+00:09:00,107 --> 00:09:02,428
+the vendor link inside one server.
+
+230
+00:09:02,428 --> 00:09:06,521
+That is why an eight GPU server usually caps tensor parallel at
+
+231
+00:09:06,521 --> 00:09:07,132
+eight.
+
+232
+00:09:08,382 --> 00:09:11,499
+Pipeline parallel splits the layers into stages,
+
+233
+00:09:11,499 --> 00:09:12,818
+one stage per GPU,
+
+234
+00:09:12,818 --> 00:09:14,376
+like an assembly line.
+
+235
+00:09:14,376 --> 00:09:17,613
+It only sends the boundary results between stages,
+
+236
+00:09:17,613 --> 00:09:20,970
+so it copes with the slower network between servers.
+
+237
+00:09:21,320 --> 00:09:22,854
+The cost is the bubble.
+
+238
+00:09:22,854 --> 00:09:25,582
+At the start the later stages wait for work,
+
+239
+00:09:25,582 --> 00:09:28,139
+and at the end the early stages sit idle.
+
+240
+00:09:28,139 --> 00:09:29,162
+To measure it,
+
+241
+00:09:29,162 --> 00:09:32,345
+I simulated the schedule and counted the idle slots.
+
+242
+00:09:33,595 --> 00:09:36,927
+Here is a four stage pipeline with four micro batches.
+
+243
+00:09:36,927 --> 00:09:38,479
+Blue is a forward step,
+
+244
+00:09:38,479 --> 00:09:40,203
+orange is a backward step.
+
+245
+00:09:40,553 --> 00:09:42,611
+Gray is a GPU doing nothing.
+
+246
+00:09:42,611 --> 00:09:44,670
+Six of every fourteen slots,
+
+247
+00:09:44,670 --> 00:09:47,114
+forty-two point nine percent idle,
+
+248
+00:09:47,114 --> 00:09:49,623
+and it matches the formula exactly.
+
+249
+00:09:49,623 --> 00:09:51,874
+The bubble is stages minus one,
+
+250
+00:09:51,874 --> 00:09:54,769
+over micro batches plus stages minus one.
+
+251
+00:09:56,019 --> 00:09:57,739
+More stages make it worse.
+
+252
+00:09:57,739 --> 00:10:01,697
+Eight stages with eight micro batches wastes forty-seven percent.
+
+253
+00:10:01,697 --> 00:10:04,049
+Give the pipeline more micro batches,
+
+254
+00:10:04,049 --> 00:10:06,859
+thirty-two, and it drops to eighteen percent.
+
+255
+00:10:06,859 --> 00:10:08,637
+A hundred and twenty-eight,
+
+256
+00:10:08,637 --> 00:10:09,612
+five percent.
+
+257
+00:10:09,962 --> 00:10:14,503
+A trick called interleaving gives each GPU several smaller chunks and cuts
+
+258
+00:10:14,503 --> 00:10:16,948
+the bubble to roughly a quarter again.
+
+259
+00:10:16,948 --> 00:10:18,404
+The lesson is simple.
+
+260
+00:10:18,404 --> 00:10:19,976
+Keep the pipeline full.
+
+261
+00:10:21,226 --> 00:10:22,980
+So where does each split go?
+
+262
+00:10:22,980 --> 00:10:25,721
+The rule is that the more often a group talks,
+
+263
+00:10:25,721 --> 00:10:27,530
+the faster the link it needs.
+
+264
+00:10:27,530 --> 00:10:30,928
+Tensor parallel goes inside one server on the vendor link.
+
+265
+00:10:30,928 --> 00:10:32,737
+Pipeline goes across servers.
+
+266
+00:10:32,737 --> 00:10:33,724
+Data parallel,
+
+267
+00:10:33,724 --> 00:10:35,478
+which overlaps with compute,
+
+268
+00:10:35,478 --> 00:10:36,519
+goes outermost.
+
+269
+00:10:36,869 --> 00:10:41,694
+Llama three's biggest model was reported as tensor parallel eight inside each
+
+270
+00:10:41,694 --> 00:10:43,422
+server, pipeline sixteen,
+
+271
+00:10:43,422 --> 00:10:46,698
+and data parallel up to a hundred and twenty-eight.
+
+272
+00:10:46,698 --> 00:10:47,830
+A memory trick:
+
+273
+00:10:47,830 --> 00:10:49,617
+tiny cats eat pizza daily,
+
+274
+00:10:49,617 --> 00:10:50,510
+for tensor,
+
+275
+00:10:50,510 --> 00:10:51,701
+context, expert,
+
+276
+00:10:51,701 --> 00:10:52,833
+pipeline, data.
+
+277
+00:10:54,083 --> 00:10:55,293
+Now the network,
+
+278
+00:10:55,293 --> 00:10:56,200
+in numbers.
+
+279
+00:10:56,200 --> 00:11:01,099
+Gradients for a seven billion model in half precision are fourteen gigabytes.
+
+280
+00:11:01,099 --> 00:11:04,305
+A ring all reduce sends about twice that per GPU,
+
+281
+00:11:04,305 --> 00:11:05,938
+twenty-eight gigabytes.
+
+282
+00:11:06,288 --> 00:11:09,173
+At fifty gigabytes per second between servers,
+
+283
+00:11:09,173 --> 00:11:12,867
+that is point five six seconds per step if nothing overlaps.
+
+284
+00:11:12,867 --> 00:11:15,695
+On the vendor link at four hundred and fifty,
+
+285
+00:11:15,695 --> 00:11:16,676
+point oh six.
+
+286
+00:11:16,676 --> 00:11:20,370
+A seventy billion model over the slow link is five point six
+
+287
+00:11:20,370 --> 00:11:21,582
+seconds per step.
+
+288
+00:11:21,582 --> 00:11:24,237
+This is arithmetic from vendor bandwidths.
+
+289
+00:11:25,487 --> 00:11:26,655
+A nasty gotcha.
+
+290
+00:11:26,655 --> 00:11:30,834
+The library that does these group communications is called N C C
+
+291
+00:11:30,834 --> 00:11:34,459
+L. If the right network plugin or settings are missing,
+
+292
+00:11:34,459 --> 00:11:37,163
+it quietly falls back to a slower route.
+
+293
+00:11:37,163 --> 00:11:38,393
+Nothing crashes.
+
+294
+00:11:38,393 --> 00:11:41,219
+Your job is just two to five times slower.
+
+295
+00:11:41,569 --> 00:11:44,411
+The habit to build is to turn on N C C L
+
+296
+00:11:44,411 --> 00:11:46,930
+debug logging on every new cluster,
+
+297
+00:11:46,930 --> 00:11:49,449
+and read which transport it picked.
+
+298
+00:11:49,449 --> 00:11:53,260
+Ten seconds of reading can save a month of wasted GPUs.
+
+299
+00:11:54,510 --> 00:11:55,995
+Number formats again.
+
+300
+00:11:55,995 --> 00:11:58,610
+B F sixteen is the default for training.
+
+301
+00:11:58,610 --> 00:12:01,581
+Eight bit floats are now proven in production,
+
+302
+00:12:01,581 --> 00:12:04,553
+DeepSeek trained a very large model with them.
+
+303
+00:12:04,553 --> 00:12:08,415
+And the newest four bit format matched eight bit quality on a
+
+304
+00:12:08,415 --> 00:12:12,218
+twelve billion model over ten trillion tokens in one report.
+
+305
+00:12:12,568 --> 00:12:17,018
+Smaller formats mean less memory and faster maths on chips that support
+
+306
+00:12:17,018 --> 00:12:19,450
+them. But each needs careful recipes,
+
+307
+00:12:19,450 --> 00:12:21,646
+so adopt them one step at a time.
+
+308
+00:12:22,896 --> 00:12:23,656
+At scale,
+
+309
+00:12:23,656 --> 00:12:25,412
+things break all the time.
+
+310
+00:12:25,412 --> 00:12:29,859
+Llama three's training run reported four hundred and nineteen unexpected
+
+311
+00:12:29,859 --> 00:12:32,024
+interruptions in fifty-four days.
+
+312
+00:12:32,024 --> 00:12:34,598
+That is one every three point one hours.
+
+313
+00:12:34,948 --> 00:12:35,828
+Plan for it.
+
+314
+00:12:35,828 --> 00:12:37,752
+Save checkpoints on a schedule,
+
+315
+00:12:37,752 --> 00:12:39,895
+like lesson two's square root rule.
+
+316
+00:12:39,895 --> 00:12:42,424
+Save them asynchronously like lesson four.
+
+317
+00:12:42,424 --> 00:12:45,173
+And restart automatically from the latest one.
+
+318
+00:12:46,423 --> 00:12:48,182
+Most teams never pretrain.
+
+319
+00:12:48,182 --> 00:12:50,351
+They fine tune an existing model.
+
+320
+00:12:50,351 --> 00:12:52,521
+And the cheap way is called LoRA.
+
+321
+00:12:52,521 --> 00:12:56,508
+Freeze the whole model and train two small matrices next to each
+
+322
+00:12:56,508 --> 00:12:57,564
+layer instead.
+
+323
+00:12:57,914 --> 00:12:59,969
+I measured it on my small model.
+
+324
+00:12:59,969 --> 00:13:01,112
+With rank eight,
+
+325
+00:13:01,112 --> 00:13:04,138
+LoRA trained under one percent of the parameters,
+
+326
+00:13:04,138 --> 00:13:08,821
+and the optimiser's memory shrank from two hundred and sixty-nine megabytes to
+
+327
+00:13:08,821 --> 00:13:09,849
+two point six.
+
+328
+00:13:09,849 --> 00:13:11,276
+A hundred times less.
+
+329
+00:13:12,526 --> 00:13:15,414
+The usual fine tuning order has three steps.
+
+330
+00:13:15,414 --> 00:13:19,144
+First, supervised fine tuning on examples of good answers.
+
+331
+00:13:19,144 --> 00:13:20,888
+Then preference training,
+
+332
+00:13:20,888 --> 00:13:21,971
+such as D P O,
+
+333
+00:13:21,971 --> 00:13:25,700
+where the model learns which of two answers people prefer.
+
+334
+00:13:25,700 --> 00:13:27,204
+Then, for some tasks,
+
+335
+00:13:27,204 --> 00:13:29,911
+reinforcement learning against a checker.
+
+336
+00:13:30,261 --> 00:13:34,053
+A variant called Q LoRA also stores the frozen weights in four
+
+337
+00:13:34,053 --> 00:13:36,466
+bits, so a big model fits on one card.
+
+338
+00:13:36,466 --> 00:13:37,960
+I am describing these.
+
+339
+00:13:37,960 --> 00:13:40,316
+They are not measured in this lesson.
+
+340
+00:13:41,566 --> 00:13:43,456
+A quick map of the tools.
+
+341
+00:13:43,456 --> 00:13:45,020
+PyTorch's own stack,
+
+342
+00:13:45,020 --> 00:13:46,846
+with torchrun to launch,
+
+343
+00:13:46,846 --> 00:13:48,475
+F S D P two to shard,
+
+344
+00:13:48,475 --> 00:13:50,691
+and torchtitan as a reference.
+
+345
+00:13:50,691 --> 00:13:55,058
+NVIDIA's Megatron for thousand GPU runs and mixture of experts.
+
+346
+00:13:55,058 --> 00:13:56,949
+JAX with MaxText on TPUs.
+
+347
+00:13:56,949 --> 00:14:01,446
+And Hugging Face Trainer with DeepSpeed for one machine to a few,
+
+348
+00:14:01,446 --> 00:14:03,010
+and for fine tuning.
+
+349
+00:14:03,360 --> 00:14:04,870
+For most people reading this,
+
+350
+00:14:04,870 --> 00:14:06,516
+the last one is the right start.
+
+351
+00:14:07,766 --> 00:14:09,143
+For ShopNest Copilot,
+
+352
+00:14:09,143 --> 00:14:10,520
+we will not pretrain.
+
+353
+00:14:10,520 --> 00:14:13,879
+We will fine tune an eight billion model to answer in our
+
+354
+00:14:13,879 --> 00:14:14,870
+store's style.
+
+355
+00:14:14,870 --> 00:14:19,110
+Full fine tuning would need about a hundred and twenty-eight gigabytes of
+
+356
+00:14:19,110 --> 00:14:20,157
+training state.
+
+357
+00:14:20,157 --> 00:14:22,249
+Sixteen bytes times eight billion.
+
+358
+00:14:22,599 --> 00:14:26,559
+LoRA keeps the frozen weights at sixteen gigabytes in the half size
+
+359
+00:14:26,559 --> 00:14:29,068
+format, plus a few megabytes of adapters,
+
+360
+00:14:29,068 --> 00:14:30,462
+and it fits one card.
+
+361
+00:14:30,462 --> 00:14:31,633
+That is our plan.
+
+362
+00:14:32,883 --> 00:14:34,865
+Four words to carry forward.
+
+363
+00:14:34,865 --> 00:14:36,104
+Optimiser state:
+
+364
+00:14:36,104 --> 00:14:39,262
+the memory the optimiser keeps for each weight.
+
+365
+00:14:39,262 --> 00:14:42,730
+Sharding: giving each GPU a slice instead of a copy.
+
+366
+00:14:43,080 --> 00:14:46,097
+Recompute: trading extra compute for less memory.
+
+367
+00:14:46,097 --> 00:14:46,951
+And bubble:
+
+368
+00:14:46,951 --> 00:14:49,968
+the idle time at the start and end of a pipeline.
+
+369
+00:14:51,218 --> 00:14:52,437
+Interview corner.
+
+370
+00:14:52,437 --> 00:14:55,630
+Asked how much memory training needs per parameter,
+
+371
+00:14:55,630 --> 00:14:58,997
+say: about sixteen bytes with Adam in mixed precision.
+
+372
+00:14:58,997 --> 00:15:00,158
+Two for weights,
+
+373
+00:15:00,158 --> 00:15:01,435
+two for gradients,
+
+374
+00:15:01,435 --> 00:15:04,629
+twelve for the master copy and Adam's two memories.
+
+375
+00:15:04,629 --> 00:15:07,531
+I measured sixteen point zero on a real model.
+
+376
+00:15:07,881 --> 00:15:10,056
+Asked how to fit a big model,
+
+377
+00:15:10,056 --> 00:15:13,484
+say: shard the state with ZeRO three or F S D P,
+
+378
+00:15:13,484 --> 00:15:15,197
+recompute activations,
+
+379
+00:15:15,197 --> 00:15:20,404
+and split with tensor parallel inside a server and pipeline across servers.
+
+380
+00:15:21,654 --> 00:15:22,477
+Your turn.
+
+381
+00:15:22,477 --> 00:15:25,123
+The zip for this lesson has four scripts.
+
+382
+00:15:25,123 --> 00:15:27,239
+The memory ledger and LoRA test,
+
+383
+00:15:27,239 --> 00:15:28,827
+the recomputation test,
+
+384
+00:15:28,827 --> 00:15:30,826
+the pipeline bubble simulator,
+
+385
+00:15:30,826 --> 00:15:32,766
+and the GPU hours calculator.
+
+386
+00:15:33,116 --> 00:15:36,675
+Change the model size or the number of micro batches and see
+
+387
+00:15:36,675 --> 00:15:37,509
+what moves.
+
+388
+00:15:37,509 --> 00:15:40,845
+One changed number teaches more than an hour of reading.
+
+389
+00:15:42,095 --> 00:15:45,400
+Recap. Training needs sixteen bytes per parameter,
+
+390
+00:15:45,400 --> 00:15:46,135
+not two,
+
+391
+00:15:46,135 --> 00:15:50,603
+so a seventy billion model needs eleven hundred and twenty gigabytes.
+
+392
+00:15:50,603 --> 00:15:54,275
+Sharding gets it down to seventeen and a half per GPU on
+
+393
+00:15:54,275 --> 00:15:59,110
+sixty-four. Recompute halves activation memory for about a fifth more time.
+
+394
+00:15:59,460 --> 00:16:04,074
+A seven billion run on two trillion tokens is about fifty-nine thousand
+
+395
+00:16:04,074 --> 00:16:04,936
+GPU hours.
+
+396
+00:16:04,936 --> 00:16:07,950
+Keep the chattiest split on the fastest link.
+
+397
+00:16:07,950 --> 00:16:10,042
+LoRA trains under one percent.
+
+398
+00:16:10,042 --> 00:16:11,027
+Next lesson:
+
+399
+00:16:11,027 --> 00:16:12,626
+inference and serving.
+
+400
+00:16:12,626 --> 00:16:15,333
+How to make a trained model answer fast.
+
+401
+00:16:16,583 --> 00:16:17,775
+In the next lesson:
+
+402
+00:16:17,775 --> 00:16:19,122
+inference and serving.
+
+403
+00:16:19,122 --> 00:16:21,401
+How to make a trained model answer fast.
+
+404
+00:16:21,751 --> 00:16:23,343
+Subscribe so you don't miss it.
+
+405
+00:16:23,343 --> 00:16:24,617
+See you in the notebook.
+
