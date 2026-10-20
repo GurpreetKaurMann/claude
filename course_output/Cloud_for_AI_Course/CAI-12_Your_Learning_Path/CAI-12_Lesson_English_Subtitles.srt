@@ -1,0 +1,1748 @@
+1
+00:00:00,500 --> 00:00:01,614
+In sixteen weeks,
+
+2
+00:00:01,614 --> 00:00:03,207
+at about ten hours a week,
+
+3
+00:00:03,207 --> 00:00:06,869
+you can go from knowing nothing about the cloud to having shipped
+
+4
+00:00:06,869 --> 00:00:09,576
+six projects that match what employers ask for.
+
+5
+00:00:09,576 --> 00:00:13,504
+The notebook estimates it costs about one hundred fifty to two hundred
+
+6
+00:00:13,504 --> 00:00:15,203
+fifty dollars out of pocket,
+
+7
+00:00:15,203 --> 00:00:16,902
+if you tear everything down.
+
+8
+00:00:17,252 --> 00:00:19,739
+And if you forget one G P U for a month,
+
+9
+00:00:19,739 --> 00:00:23,017
+that single mistake can cost more than the whole path.
+
+10
+00:00:23,017 --> 00:00:25,165
+This final lesson is the road map,
+
+11
+00:00:25,165 --> 00:00:25,956
+the money,
+
+12
+00:00:25,956 --> 00:00:27,143
+the certificates,
+
+13
+00:00:27,143 --> 00:00:30,196
+and one last check on every number in this course.
+
+14
+00:00:31,446 --> 00:00:34,929
+Welcome to lesson twelve of the cloud for A I engineers course,
+
+15
+00:00:34,929 --> 00:00:36,228
+on The Code Notebook.
+
+16
+00:00:36,578 --> 00:00:39,713
+The handwritten notes and the code for this lesson are linked in
+
+17
+00:00:39,713 --> 00:00:40,635
+the description.
+
+18
+00:00:41,885 --> 00:00:43,770
+You have seen the whole stack.
+
+19
+00:00:43,770 --> 00:00:44,989
+Compute and chips,
+
+20
+00:00:44,989 --> 00:00:46,154
+containers, data,
+
+21
+00:00:46,154 --> 00:00:47,373
+training, serving,
+
+22
+00:00:47,373 --> 00:00:49,314
+shipping, retrieval and agents,
+
+23
+00:00:49,314 --> 00:00:50,589
+security, and cost.
+
+24
+00:00:50,589 --> 00:00:53,084
+Each lesson ended with a lab you can run,
+
+25
+00:00:53,084 --> 00:00:56,577
+and each number carried a label saying how it was produced.
+
+26
+00:00:56,927 --> 00:00:58,558
+Now the question is order.
+
+27
+00:00:58,558 --> 00:01:00,080
+What do you learn first,
+
+28
+00:01:00,080 --> 00:01:01,276
+what do you build,
+
+29
+00:01:01,276 --> 00:01:04,103
+and how do you know you are done with each stop.
+
+30
+00:01:04,103 --> 00:01:05,027
+Honest label.
+
+31
+00:01:05,027 --> 00:01:08,398
+The order is my synthesis of what job postings ask for and
+
+32
+00:01:08,398 --> 00:01:10,409
+which cost traps catch beginners.
+
+33
+00:01:10,409 --> 00:01:12,258
+No source ranks it officially.
+
+34
+00:01:13,508 --> 00:01:15,141
+The road has six stops.
+
+35
+00:01:15,141 --> 00:01:16,532
+Cloud fundamentals,
+
+36
+00:01:16,532 --> 00:01:18,347
+containers and Kubernetes,
+
+37
+00:01:18,347 --> 00:01:19,556
+serving a model,
+
+38
+00:01:19,556 --> 00:01:22,097
+retrieval and agents with evaluations,
+
+39
+00:01:22,097 --> 00:01:24,335
+MLOps and infrastructure as code,
+
+40
+00:01:24,335 --> 00:01:26,573
+and finally distributed training.
+
+41
+00:01:26,573 --> 00:01:28,629
+Each stop uses the one before.
+
+42
+00:01:28,629 --> 00:01:33,045
+You cannot put a model on Kubernetes without identity and networking.
+
+43
+00:01:33,395 --> 00:01:37,001
+You cannot debug a slow retrieval app if you do not know
+
+44
+00:01:37,001 --> 00:01:38,383
+what batching does.
+
+45
+00:01:38,383 --> 00:01:42,650
+Distributed training costs the most and is the rarest ask for entry
+
+46
+00:01:42,650 --> 00:01:44,273
+roles, so it goes last.
+
+47
+00:01:44,273 --> 00:01:45,595
+The first letters,
+
+48
+00:01:45,595 --> 00:01:46,136
+F, C,
+
+49
+00:01:46,136 --> 00:01:46,677
+S, R,
+
+50
+00:01:46,677 --> 00:01:47,218
+M, D,
+
+51
+00:01:47,218 --> 00:01:50,403
+spell, Frugal Coders Spend Really Modest Dollars.
+
+52
+00:01:51,653 --> 00:01:52,529
+One twist.
+
+53
+00:01:52,529 --> 00:01:53,656
+Run stop four,
+
+54
+00:01:53,656 --> 00:01:56,035
+retrieval, agents and evaluations,
+
+55
+00:01:56,035 --> 00:01:58,163
+alongside stops two and three.
+
+56
+00:01:58,163 --> 00:02:00,354
+It needs almost no cloud spend,
+
+57
+00:02:00,354 --> 00:02:01,857
+mostly A P I tokens,
+
+58
+00:02:01,857 --> 00:02:05,300
+and it maps to the most common ask in the postings.
+
+59
+00:02:05,300 --> 00:02:08,931
+Foundation models appear in fifty-one percent of them.
+
+60
+00:02:09,281 --> 00:02:11,578
+So start reading for it in week five.
+
+61
+00:02:11,578 --> 00:02:13,540
+Every stop ends with a project,
+
+62
+00:02:13,540 --> 00:02:14,772
+an estimated cost,
+
+63
+00:02:14,772 --> 00:02:16,229
+and a done when check.
+
+64
+00:02:16,229 --> 00:02:17,686
+Do not skip the check.
+
+65
+00:02:17,686 --> 00:02:21,216
+Being able to show the thing working is what turns a course
+
+66
+00:02:21,216 --> 00:02:22,785
+into portfolio evidence.
+
+67
+00:02:24,035 --> 00:02:24,782
+Stop one,
+
+68
+00:02:24,782 --> 00:02:26,102
+cloud fundamentals,
+
+69
+00:02:26,102 --> 00:02:27,366
+weeks one and two.
+
+70
+00:02:27,366 --> 00:02:28,744
+Learn in this order.
+
+71
+00:02:28,744 --> 00:02:30,696
+Identity with least privilege,
+
+72
+00:02:30,696 --> 00:02:32,016
+private networking,
+
+73
+00:02:32,016 --> 00:02:34,543
+object storage for data and checkpoints,
+
+74
+00:02:34,543 --> 00:02:36,208
+G P U compute and quotas,
+
+75
+00:02:36,208 --> 00:02:38,504
+and billing with budgets and alerts.
+
+76
+00:02:38,504 --> 00:02:40,973
+Learn deep learning basics in parallel.
+
+77
+00:02:41,323 --> 00:02:44,465
+Project. Use Terraform to build a private network,
+
+78
+00:02:44,465 --> 00:02:46,036
+a least privilege role,
+
+79
+00:02:46,036 --> 00:02:48,537
+an encrypted bucket and a budget alert.
+
+80
+00:02:48,537 --> 00:02:50,690
+Destroy it and rebuild from code.
+
+81
+00:02:50,690 --> 00:02:55,228
+Done when destroy then apply rebuilds everything with zero console clicks,
+
+82
+00:02:55,228 --> 00:02:57,671
+the role can read only its own bucket,
+
+83
+00:02:57,671 --> 00:02:59,998
+and the budget alert actually fired.
+
+84
+00:03:01,248 --> 00:03:02,030
+Stop two,
+
+85
+00:03:02,030 --> 00:03:03,834
+containers and Kubernetes,
+
+86
+00:03:03,834 --> 00:03:05,277
+weeks three to five.
+
+87
+00:03:05,277 --> 00:03:07,502
+Dockerfiles for machine learning,
+
+88
+00:03:07,502 --> 00:03:09,185
+registries, Deployments,
+
+89
+00:03:09,185 --> 00:03:10,929
+Services and autoscaling,
+
+90
+00:03:10,929 --> 00:03:12,312
+managed Kubernetes,
+
+91
+00:03:12,312 --> 00:03:14,958
+and G P U node pools that scale to zero.
+
+92
+00:03:14,958 --> 00:03:17,784
+Project. Containerise an inference service,
+
+93
+00:03:17,784 --> 00:03:20,971
+deploy it on managed Kubernetes with autoscaling,
+
+94
+00:03:20,971 --> 00:03:22,234
+and tear it down.
+
+95
+00:03:22,584 --> 00:03:26,114
+Then Terraform a G P U node pool of one small card
+
+96
+00:03:26,114 --> 00:03:27,683
+that scales to zero.
+
+97
+00:03:27,683 --> 00:03:31,018
+Done when the node shows one allocatable G P U,
+
+98
+00:03:31,018 --> 00:03:33,045
+a pod runs nvidia dash smi,
+
+99
+00:03:33,045 --> 00:03:36,445
+and the pool drops back to zero nodes when idle.
+
+100
+00:03:36,445 --> 00:03:38,798
+Request G P U quota in week one,
+
+101
+00:03:38,798 --> 00:03:41,218
+because new accounts may need it.
+
+102
+00:03:42,468 --> 00:03:43,395
+Stop three,
+
+103
+00:03:43,395 --> 00:03:44,631
+serving a model,
+
+104
+00:03:44,631 --> 00:03:46,114
+weeks six and seven.
+
+105
+00:03:46,114 --> 00:03:48,525
+The servers postings name are vLLM,
+
+106
+00:03:48,525 --> 00:03:49,637
+SGLang, T G I,
+
+107
+00:03:49,637 --> 00:03:51,182
+Triton and Ray Serve.
+
+108
+00:03:51,182 --> 00:03:53,036
+Learn time to first token,
+
+109
+00:03:53,036 --> 00:03:54,396
+tokens per second,
+
+110
+00:03:54,396 --> 00:03:56,868
+and ninety-fifth percentile latency,
+
+111
+00:03:56,868 --> 00:03:58,043
+and the levers,
+
+112
+00:03:58,043 --> 00:03:59,959
+batching, the memory cache,
+
+113
+00:03:59,959 --> 00:04:02,060
+quantisation and G P U choice.
+
+114
+00:04:02,410 --> 00:04:06,625
+Project. Serve a seven or eight billion parameter model on one small
+
+115
+00:04:06,625 --> 00:04:08,147
+card and benchmark it.
+
+116
+00:04:08,147 --> 00:04:11,192
+Done when you have a table of tokens per second,
+
+117
+00:04:11,192 --> 00:04:15,466
+first token time and tail latency at three concurrency levels and two
+
+118
+00:04:15,466 --> 00:04:19,973
+precisions, and you can explain why throughput and tail latency both rise
+
+119
+00:04:19,973 --> 00:04:21,203
+with concurrency.
+
+120
+00:04:21,203 --> 00:04:23,193
+Cost, a few dollars a session.
+
+121
+00:04:24,443 --> 00:04:25,303
+Stop four,
+
+122
+00:04:25,303 --> 00:04:27,637
+retrieval, agents and evaluations,
+
+123
+00:04:27,637 --> 00:04:29,050
+weeks eight to ten.
+
+124
+00:04:29,050 --> 00:04:30,462
+Build the pipeline,
+
+125
+00:04:30,462 --> 00:04:31,567
+ingest, chunk,
+
+126
+00:04:31,567 --> 00:04:32,612
+embed, store,
+
+127
+00:04:32,612 --> 00:04:34,024
+retrieve, generate.
+
+128
+00:04:34,024 --> 00:04:36,051
+Add agents with tool calling,
+
+129
+00:04:36,051 --> 00:04:37,279
+an M C P server,
+
+130
+00:04:37,279 --> 00:04:38,262
+and tracing.
+
+131
+00:04:38,262 --> 00:04:42,192
+Wire evaluations of recall and faithfulness into your build.
+
+132
+00:04:42,542 --> 00:04:46,211
+Done when your build goes red on a change that drops recall
+
+133
+00:04:46,211 --> 00:04:47,667
+below your threshold,
+
+134
+00:04:47,667 --> 00:04:50,928
+traces show every tool call with inputs and outputs,
+
+135
+00:04:50,928 --> 00:04:54,364
+and you can say how big your evaluation set is and what
+
+136
+00:04:54,364 --> 00:04:55,645
+it does not cover.
+
+137
+00:04:55,645 --> 00:04:57,043
+Cost, mostly tokens,
+
+138
+00:04:57,043 --> 00:04:58,848
+around zero to ten dollars.
+
+139
+00:05:00,098 --> 00:05:00,956
+Stop five,
+
+140
+00:05:00,956 --> 00:05:02,672
+MLOps and observability,
+
+141
+00:05:02,672 --> 00:05:04,450
+weeks eleven to thirteen.
+
+142
+00:05:04,450 --> 00:05:05,921
+Experiment tracking,
+
+143
+00:05:05,921 --> 00:05:07,208
+a model registry,
+
+144
+00:05:07,208 --> 00:05:10,334
+pipelines with an evaluation gate and a canary,
+
+145
+00:05:10,334 --> 00:05:12,724
+Terraform for several environments,
+
+146
+00:05:12,724 --> 00:05:14,992
+and monitoring with drift alerts.
+
+147
+00:05:14,992 --> 00:05:17,505
+Fine tune with LoRA on spot capacity,
+
+148
+00:05:17,505 --> 00:05:20,017
+saving checkpoints to object storage.
+
+149
+00:05:20,367 --> 00:05:23,807
+Done when you kill the spot machine mid run and the job
+
+150
+00:05:23,807 --> 00:05:25,963
+resumes from the last checkpoint,
+
+151
+00:05:25,963 --> 00:05:29,344
+the registry shows a versioned model with its metrics,
+
+152
+00:05:29,344 --> 00:05:32,025
+and a dashboard alert fires on fake drift.
+
+153
+00:05:32,025 --> 00:05:34,648
+Cost, roughly two to twenty-five dollars.
+
+154
+00:05:35,898 --> 00:05:36,716
+Stop six,
+
+155
+00:05:36,716 --> 00:05:38,287
+distributed training,
+
+156
+00:05:38,287 --> 00:05:40,173
+weeks fourteen to sixteen.
+
+157
+00:05:40,173 --> 00:05:42,813
+Data, tensor and pipeline parallelism,
+
+158
+00:05:42,813 --> 00:05:44,133
+ZeRO and F S D P,
+
+159
+00:05:44,133 --> 00:05:45,956
+collective communication,
+
+160
+00:05:45,956 --> 00:05:50,230
+and the memory and efficiency accounting you saw in lesson five.
+
+161
+00:05:50,230 --> 00:05:54,191
+Start with basic data parallel on a free two card notebook.
+
+162
+00:05:54,541 --> 00:05:57,210
+Then compare layouts on a few rented cards,
+
+163
+00:05:57,210 --> 00:05:59,652
+and finish with the nanochat speed run.
+
+164
+00:05:59,652 --> 00:06:02,151
+About two hours on eight H one hundreds,
+
+165
+00:06:02,151 --> 00:06:04,480
+around forty-eight dollars on demand,
+
+166
+00:06:04,480 --> 00:06:05,616
+fifteen on spot.
+
+167
+00:06:05,616 --> 00:06:06,411
+Done when,
+
+168
+00:06:06,411 --> 00:06:07,887
+from model size alone,
+
+169
+00:06:07,887 --> 00:06:10,670
+you can say whether plain data parallel fits,
+
+170
+00:06:10,670 --> 00:06:13,169
+and your measured memory roughly agrees.
+
+171
+00:06:14,419 --> 00:06:15,898
+How long does it take?
+
+172
+00:06:15,898 --> 00:06:19,084
+The plan is sixteen weeks at about ten hours a week,
+
+173
+00:06:19,084 --> 00:06:20,791
+a hundred and sixty hours.
+
+174
+00:06:20,791 --> 00:06:22,497
+That ten is my assumption.
+
+175
+00:06:22,497 --> 00:06:25,228
+At five hours a week it is thirty-two weeks.
+
+176
+00:06:25,228 --> 00:06:26,081
+At fifteen,
+
+177
+00:06:26,081 --> 00:06:27,219
+ten point seven.
+
+178
+00:06:27,219 --> 00:06:28,015
+At twenty,
+
+179
+00:06:28,015 --> 00:06:28,584
+eight.
+
+180
+00:06:28,934 --> 00:06:32,315
+There is also a twelve week fast track that skips or merges
+
+181
+00:06:32,315 --> 00:06:33,496
+four of the weeks,
+
+182
+00:06:33,496 --> 00:06:34,891
+the quantisation week,
+
+183
+00:06:34,891 --> 00:06:35,965
+the agents week,
+
+184
+00:06:35,965 --> 00:06:38,702
+the observability week and the efficiency week.
+
+185
+00:06:38,702 --> 00:06:41,815
+Change the hours in the script and read your own date.
+
+186
+00:06:43,065 --> 00:06:44,260
+What does it cost?
+
+187
+00:06:44,260 --> 00:06:48,118
+The notebook's own estimate for the whole path is about one hundred
+
+188
+00:06:48,118 --> 00:06:50,237
+fifty to two hundred fifty dollars,
+
+189
+00:06:50,237 --> 00:06:51,975
+if you tear everything down.
+
+190
+00:06:51,975 --> 00:06:53,985
+I added up the project estimates,
+
+191
+00:06:53,985 --> 00:06:57,354
+and got thirty-two to a hundred fifty-five before credits.
+
+192
+00:06:57,354 --> 00:06:59,093
+So budget the higher figure.
+
+193
+00:06:59,443 --> 00:07:01,421
+Spend climbs along the road.
+
+194
+00:07:01,421 --> 00:07:02,782
+Zero for stop one,
+
+195
+00:07:02,782 --> 00:07:05,255
+a few dollars a lab for two to five,
+
+196
+00:07:05,255 --> 00:07:06,615
+tens for stop six.
+
+197
+00:07:06,615 --> 00:07:09,521
+Pay for G P U time only from stop three on.
+
+198
+00:07:09,521 --> 00:07:10,758
+Free tiers help.
+
+199
+00:07:10,758 --> 00:07:12,551
+New accounts get credits,
+
+200
+00:07:12,551 --> 00:07:16,137
+and Kaggle gives about thirty free G P U hours a week.
+
+201
+00:07:17,387 --> 00:07:18,619
+Now the mistake.
+
+202
+00:07:18,619 --> 00:07:21,637
+A single small G P U node left up for a month
+
+203
+00:07:21,637 --> 00:07:25,826
+is seven hundred thirty hours at fifty cents to a dollar twenty,
+
+204
+00:07:25,826 --> 00:07:29,892
+three hundred sixty-five to eight hundred seventy-six dollars.
+
+205
+00:07:29,892 --> 00:07:33,403
+That is two to six times the cost of the entire path.
+
+206
+00:07:33,403 --> 00:07:36,791
+Idle resources are the number one way to overspend.
+
+207
+00:07:37,141 --> 00:07:38,687
+So the habit is simple.
+
+208
+00:07:38,687 --> 00:07:39,832
+After every lab,
+
+209
+00:07:39,832 --> 00:07:41,435
+run the destroy command,
+
+210
+00:07:41,435 --> 00:07:44,125
+then list your clusters and expect nothing.
+
+211
+00:07:44,125 --> 00:07:45,099
+Every Friday,
+
+212
+00:07:45,099 --> 00:07:46,644
+check the billing page.
+
+213
+00:07:46,644 --> 00:07:47,961
+Habit, not heroics.
+
+214
+00:07:49,211 --> 00:07:50,989
+Other traps worth knowing.
+
+215
+00:07:50,989 --> 00:07:54,902
+Free networking labs that include a managed N A T gateway keep
+
+216
+00:07:54,902 --> 00:07:56,324
+billing by the hour,
+
+217
+00:07:56,324 --> 00:07:58,814
+so avoid them or destroy the same day.
+
+218
+00:07:58,814 --> 00:08:02,133
+An old Kubernetes version on A W S can move from ten
+
+219
+00:08:02,133 --> 00:08:05,749
+cents to about sixty cents an hour for the control plane,
+
+220
+00:08:05,749 --> 00:08:07,468
+so keep versions current.
+
+221
+00:08:07,818 --> 00:08:08,661
+On Google,
+
+222
+00:08:08,661 --> 00:08:13,175
+the monthly management credit covers zonal and Autopilot clusters only,
+
+223
+00:08:13,175 --> 00:08:15,763
+not regional clusters or machine costs.
+
+224
+00:08:15,763 --> 00:08:20,037
+And spot machines with no checkpoints can cost more than on demand,
+
+225
+00:08:20,037 --> 00:08:21,541
+as lesson two showed.
+
+226
+00:08:21,541 --> 00:08:22,625
+Read the bill,
+
+227
+00:08:22,625 --> 00:08:23,949
+not just the plan.
+
+228
+00:08:25,199 --> 00:08:27,018
+Which G P U for which stop?
+
+229
+00:08:27,018 --> 00:08:30,305
+Free notebooks for stop one and basic data parallel.
+
+230
+00:08:30,305 --> 00:08:32,535
+A small twenty-four gigabyte card,
+
+231
+00:08:32,535 --> 00:08:35,528
+roughly fifty cents to a dollar twenty an hour,
+
+232
+00:08:35,528 --> 00:08:37,171
+for stops two and three.
+
+233
+00:08:37,171 --> 00:08:41,045
+A mid size card around ninety-two cents for bigger benchmarks.
+
+234
+00:08:41,045 --> 00:08:42,277
+An A one hundred,
+
+235
+00:08:42,277 --> 00:08:43,744
+about a dollar fifty,
+
+236
+00:08:43,744 --> 00:08:44,800
+for stop five.
+
+237
+00:08:45,150 --> 00:08:46,903
+And rented H one hundreds,
+
+238
+00:08:46,903 --> 00:08:50,699
+about a dollar thirty-three to three dollars on marketplaces,
+
+239
+00:08:50,699 --> 00:08:51,692
+for stop six.
+
+240
+00:08:51,692 --> 00:08:56,248
+Prices are vendor and aggregator figures from September twenty twenty-six,
+
+241
+00:08:56,248 --> 00:08:57,299
+and they move.
+
+242
+00:08:57,299 --> 00:09:01,037
+Spend credits on the central processor and Kubernetes stops,
+
+243
+00:09:01,037 --> 00:09:03,782
+and rent marketplace cards for stops three,
+
+244
+00:09:03,782 --> 00:09:04,775
+five and six.
+
+245
+00:09:06,025 --> 00:09:09,862
+Certificates. In twenty twenty-six there was big churn.
+
+246
+00:09:09,862 --> 00:09:13,959
+The A W S Machine Learning Specialty exam retired in March,
+
+247
+00:09:13,959 --> 00:09:16,560
+the Azure A I Engineer exam in June,
+
+248
+00:09:16,560 --> 00:09:19,551
+and the Azure Data Scientist exam in June.
+
+249
+00:09:19,551 --> 00:09:20,722
+A mnemonic is,
+
+250
+00:09:20,722 --> 00:09:21,958
+who went M A D.
+
+251
+00:09:21,958 --> 00:09:22,608
+M L S,
+
+252
+00:09:22,608 --> 00:09:23,843
+A I one oh two,
+
+253
+00:09:23,843 --> 00:09:25,144
+D P one hundred.
+
+254
+00:09:25,494 --> 00:09:29,164
+Swaps. The A W S ML Engineer exam moved to version C
+
+255
+00:09:29,164 --> 00:09:30,016
+zero two.
+
+256
+00:09:30,016 --> 00:09:33,423
+The Azure engineer exam became A I one oh three,
+
+257
+00:09:33,423 --> 00:09:34,406
+a new exam,
+
+258
+00:09:34,406 --> 00:09:37,683
+and Azure A I Fundamentals became nine oh one.
+
+259
+00:09:37,683 --> 00:09:39,452
+If you hold an old one,
+
+260
+00:09:39,452 --> 00:09:42,204
+it stays active for its normal period.
+
+261
+00:09:42,204 --> 00:09:46,988
+Always check the exam code on the official page right before booking.
+
+262
+00:09:48,238 --> 00:09:49,884
+Which certificate when?
+
+263
+00:09:49,884 --> 00:09:50,676
+Stop one,
+
+264
+00:09:50,676 --> 00:09:52,139
+a fundamentals exam,
+
+265
+00:09:52,139 --> 00:09:55,735
+like the A W S A I Practitioner at one hundred dollars.
+
+266
+00:09:55,735 --> 00:09:56,527
+Stop two,
+
+267
+00:09:56,527 --> 00:09:59,574
+the Kubernetes associate at two hundred fifty,
+
+268
+00:09:59,574 --> 00:10:04,085
+then the hands on Kubernetes administrator at four hundred forty-five.
+
+269
+00:10:04,085 --> 00:10:04,938
+Stop four,
+
+270
+00:10:04,938 --> 00:10:09,144
+the A W S Generative A I Developer Professional at three hundred.
+
+271
+00:10:09,494 --> 00:10:10,335
+Stop five,
+
+272
+00:10:10,335 --> 00:10:13,640
+the Google Professional ML Engineer at two hundred,
+
+273
+00:10:13,640 --> 00:10:15,383
+or the A W S ML Engineer.
+
+274
+00:10:15,383 --> 00:10:19,470
+Hands on exams in a live terminal are probably a stronger signal
+
+275
+00:10:19,470 --> 00:10:20,972
+than multiple choice,
+
+276
+00:10:20,972 --> 00:10:23,376
+though that is inferred from format,
+
+277
+00:10:23,376 --> 00:10:25,299
+not from an employer survey.
+
+278
+00:10:25,299 --> 00:10:28,965
+No data shows how often postings require a specific cert.
+
+279
+00:10:28,965 --> 00:10:30,468
+Projects beat badges.
+
+280
+00:10:30,468 --> 00:10:33,112
+Use certs as structure and a tiebreaker.
+
+281
+00:10:34,362 --> 00:10:35,927
+What to read and watch.
+
+282
+00:10:35,927 --> 00:10:37,608
+If you are short on time,
+
+283
+00:10:37,608 --> 00:10:38,767
+a minimal stack.
+
+284
+00:10:38,767 --> 00:10:41,955
+Karpathy's Zero to Hero for from scratch intuition.
+
+285
+00:10:41,955 --> 00:10:44,158
+Made With ML to learn how to ship.
+
+286
+00:10:44,158 --> 00:10:45,839
+The A I Engineering book,
+
+287
+00:10:45,839 --> 00:10:48,157
+plus the Hugging Face agents course,
+
+288
+00:10:48,157 --> 00:10:49,896
+for foundation model apps.
+
+289
+00:10:49,896 --> 00:10:53,896
+Then the Ultra Scale Playbook and nanochat for training at scale.
+
+290
+00:10:54,246 --> 00:10:56,480
+Free options include fast dot A I,
+
+291
+00:10:56,480 --> 00:10:59,654
+the Hugging Face language model and M C P courses,
+
+292
+00:10:59,654 --> 00:11:03,005
+and Stanford's language models from scratch lectures.
+
+293
+00:11:03,005 --> 00:11:06,709
+The notebook marks anything it could not verify this round,
+
+294
+00:11:06,709 --> 00:11:08,825
+such as current course catalogs,
+
+295
+00:11:08,825 --> 00:11:10,471
+so check before you buy.
+
+296
+00:11:11,721 --> 00:11:13,516
+What do employers ask for?
+
+297
+00:11:13,516 --> 00:11:18,003
+In a sample of forty-three thousand four hundred eighty United States A
+
+298
+00:11:18,003 --> 00:11:21,473
+I engineering postings through July twenty twenty-six,
+
+299
+00:11:21,473 --> 00:11:23,927
+Python appeared in sixty-two percent,
+
+300
+00:11:23,927 --> 00:11:25,961
+cloud platforms in fifty-five,
+
+301
+00:11:25,961 --> 00:11:28,055
+foundation models in fifty-one.
+
+302
+00:11:28,055 --> 00:11:30,628
+About fifteen hundred new roles a week.
+
+303
+00:11:30,978 --> 00:11:33,667
+Platform and L L M ops roles add vLLM,
+
+304
+00:11:33,667 --> 00:11:35,396
+Kubernetes with G P Us,
+
+305
+00:11:35,396 --> 00:11:37,445
+Terraform and observability,
+
+306
+00:11:37,445 --> 00:11:40,134
+and usually want three to seven years.
+
+307
+00:11:40,134 --> 00:11:42,247
+If you are switching careers,
+
+308
+00:11:42,247 --> 00:11:45,897
+the realistic way in is an applied A I engineer role,
+
+309
+00:11:45,897 --> 00:11:47,306
+stops one to four,
+
+310
+00:11:47,306 --> 00:11:49,995
+with platform skills added on the job.
+
+311
+00:11:51,245 --> 00:11:52,755
+A practical trick.
+
+312
+00:11:52,755 --> 00:11:56,048
+The projects here map onto posting language.
+
+313
+00:11:56,048 --> 00:11:58,107
+vLLM throughput benchmark.
+
+314
+00:11:58,107 --> 00:12:00,165
+Terraform G P U node pool.
+
+315
+00:12:00,165 --> 00:12:02,360
+RAG evaluation suite in C I.
+
+316
+00:12:02,360 --> 00:12:04,830
+LoRA on spot with checkpointing.
+
+317
+00:12:04,830 --> 00:12:09,565
+Put those exact phrases in your repository read me files and your
+
+318
+00:12:09,565 --> 00:12:10,319
+resume.
+
+319
+00:12:10,669 --> 00:12:12,142
+Show the thing working,
+
+320
+00:12:12,142 --> 00:12:13,234
+with the number.
+
+321
+00:12:13,234 --> 00:12:16,507
+A table of tokens per second you measured beats a badge.
+
+322
+00:12:16,507 --> 00:12:19,781
+A repository that says what it cost and what it does not
+
+323
+00:12:19,781 --> 00:12:20,981
+cover earns trust.
+
+324
+00:12:20,981 --> 00:12:24,201
+That is the habit this whole course has tried to build.
+
+325
+00:12:25,451 --> 00:12:27,953
+A few honest limits before you start.
+
+326
+00:12:27,953 --> 00:12:31,616
+Prices, exam codes and free credit rules change monthly,
+
+327
+00:12:31,616 --> 00:12:35,156
+so treat every dollar figure here as a dated estimate.
+
+328
+00:12:35,156 --> 00:12:38,880
+Sources disagree on several certificate prices and dates,
+
+329
+00:12:38,880 --> 00:12:40,833
+and the notebook flags them.
+
+330
+00:12:41,183 --> 00:12:45,083
+Free trial G P U quota was not rechecked in twenty twenty-six,
+
+331
+00:12:45,083 --> 00:12:47,447
+so do not plan stop three around it.
+
+332
+00:12:47,447 --> 00:12:50,992
+And the career numbers come from public posting samples,
+
+333
+00:12:50,992 --> 00:12:52,528
+which are directional,
+
+334
+00:12:52,528 --> 00:12:53,651
+not guarantees.
+
+335
+00:12:53,651 --> 00:12:57,019
+Verify the one or two that decide your next purchase.
+
+336
+00:12:58,269 --> 00:12:59,191
+One last lab,
+
+337
+00:12:59,191 --> 00:13:00,872
+and it is a different kind.
+
+338
+00:13:00,872 --> 00:13:02,336
+I made a claims ledger.
+
+339
+00:13:02,336 --> 00:13:05,752
+For thirty-two headline numbers from lessons one to eleven,
+
+340
+00:13:05,752 --> 00:13:08,951
+a script looks the number up in the saved output of the
+
+341
+00:13:08,951 --> 00:13:10,307
+lab that produced it,
+
+342
+00:13:10,307 --> 00:13:11,662
+and prints its label.
+
+343
+00:13:11,662 --> 00:13:13,289
+All thirty-two were found.
+
+344
+00:13:13,639 --> 00:13:15,936
+Eleven were measured on one machine,
+
+345
+00:13:15,936 --> 00:13:19,093
+thirteen came from simulations with assumed inputs,
+
+346
+00:13:19,093 --> 00:13:20,529
+five were arithmetic,
+
+347
+00:13:20,529 --> 00:13:22,481
+and three used synthetic data.
+
+348
+00:13:22,481 --> 00:13:25,065
+It cannot prove the experiments are good.
+
+349
+00:13:25,065 --> 00:13:28,280
+It proves each claim came from a file you can rerun,
+
+350
+00:13:28,280 --> 00:13:30,979
+and that is the standard to hold anyone to,
+
+351
+00:13:30,979 --> 00:13:31,955
+including me.
+
+352
+00:13:33,205 --> 00:13:35,155
+A few things the labs showed.
+
+353
+00:13:35,155 --> 00:13:39,412
+A seventy billion model at eight bit plus thirty-two chats needs one
+
+354
+00:13:39,412 --> 00:13:41,481
+hundred eighty-seven gigabytes.
+
+355
+00:13:41,481 --> 00:13:45,737
+Skipping checkpoints on spot turned a hundred hour job into over two
+
+356
+00:13:45,737 --> 00:13:47,629
+million hours in simulation.
+
+357
+00:13:47,629 --> 00:13:52,180
+Twenty thousand small files read twenty-five times slower than one shard.
+
+358
+00:13:52,530 --> 00:13:56,521
+Mixed precision training state measured sixteen bytes per parameter.
+
+359
+00:13:56,521 --> 00:13:59,680
+The memory cache made generation twelve times faster.
+
+360
+00:13:59,680 --> 00:14:02,894
+An eval gate blocked a change that raised the average.
+
+361
+00:14:02,894 --> 00:14:06,164
+And the keyword filter stopped three of twelve attacks,
+
+362
+00:14:06,164 --> 00:14:08,492
+where an egress allowlist leaked none.
+
+363
+00:14:09,742 --> 00:14:11,104
+Our course project,
+
+364
+00:14:11,104 --> 00:14:12,347
+ShopNest Copilot,
+
+365
+00:14:12,347 --> 00:14:13,709
+is now a full plan.
+
+366
+00:14:13,709 --> 00:14:15,071
+It fits its memory,
+
+367
+00:14:15,071 --> 00:14:17,320
+runs on the right mix of capacity,
+
+368
+00:14:17,320 --> 00:14:18,978
+ships as layered images,
+
+369
+00:14:18,978 --> 00:14:20,340
+reads sharded data,
+
+370
+00:14:20,340 --> 00:14:22,767
+and serves with a cache and batching.
+
+371
+00:14:22,767 --> 00:14:25,669
+It deploys through an eval gate and a canary.
+
+372
+00:14:26,019 --> 00:14:28,548
+It retrieves with chunks that were tested,
+
+373
+00:14:28,548 --> 00:14:30,308
+agents that survive a crash,
+
+374
+00:14:30,308 --> 00:14:34,268
+and an architecture that limits what an injected instruction can do.
+
+375
+00:14:34,268 --> 00:14:36,523
+And it is priced per resolved ticket.
+
+376
+00:14:36,523 --> 00:14:38,998
+That is what a cloud A I engineer builds.
+
+377
+00:14:38,998 --> 00:14:40,372
+Not any single trick,
+
+378
+00:14:40,372 --> 00:14:41,472
+but all of them,
+
+379
+00:14:41,472 --> 00:14:42,737
+in the right order.
+
+380
+00:14:43,987 --> 00:14:45,680
+What do you do this week?
+
+381
+00:14:45,680 --> 00:14:49,823
+Open one cloud account and set a budget alert before anything else.
+
+382
+00:14:49,823 --> 00:14:51,457
+Request G P U quota now,
+
+383
+00:14:51,457 --> 00:14:53,383
+since approval can take days.
+
+384
+00:14:53,383 --> 00:14:55,134
+Pick one stop one project,
+
+385
+00:14:55,134 --> 00:14:56,651
+the Terraform network,
+
+386
+00:14:56,651 --> 00:14:58,635
+role, bucket and budget alert.
+
+387
+00:14:58,985 --> 00:15:01,152
+Run the lab scripts from this course,
+
+388
+00:15:01,152 --> 00:15:02,632
+change a number in each,
+
+389
+00:15:02,632 --> 00:15:04,323
+and write down what you saw.
+
+390
+00:15:04,323 --> 00:15:05,327
+Then on Friday,
+
+391
+00:15:05,327 --> 00:15:07,916
+run the teardown commands and check the bill.
+
+392
+00:15:07,916 --> 00:15:09,026
+That is week one.
+
+393
+00:15:09,026 --> 00:15:10,135
+Sixteen of those,
+
+394
+00:15:10,135 --> 00:15:12,091
+and you are a cloud A I engineer.
+
+395
+00:15:13,341 --> 00:15:14,568
+Interview corner.
+
+396
+00:15:14,568 --> 00:15:19,125
+Asked why you run retrieval and agents in parallel with the infrastructure
+
+397
+00:15:19,125 --> 00:15:20,002
+stops, say:
+
+398
+00:15:20,002 --> 00:15:22,047
+it needs almost no cloud spend,
+
+399
+00:15:22,047 --> 00:15:25,143
+and foundation models appear in half of postings.
+
+400
+00:15:25,143 --> 00:15:28,299
+Asked how a spot run can cost more than on demand,
+
+401
+00:15:28,299 --> 00:15:29,993
+say: with no checkpoints,
+
+402
+00:15:29,993 --> 00:15:31,804
+an eviction loses all work.
+
+403
+00:15:32,154 --> 00:15:34,435
+Asked how to avoid a surprise bill,
+
+404
+00:15:34,435 --> 00:15:37,301
+say: set a budget alert before anything else,
+
+405
+00:15:37,301 --> 00:15:39,055
+tear down after every lab,
+
+406
+00:15:39,055 --> 00:15:41,629
+and check for idle resources every week.
+
+407
+00:15:41,629 --> 00:15:44,787
+One forgotten G P U can cost more than the rest of
+
+408
+00:15:44,787 --> 00:15:46,073
+the path combined.
+
+409
+00:15:47,323 --> 00:15:48,865
+Four last words to keep.
+
+410
+00:15:48,865 --> 00:15:50,903
+Teardown: destroy what you built,
+
+411
+00:15:50,903 --> 00:15:53,161
+then confirm nothing is left billing.
+
+412
+00:15:53,161 --> 00:15:53,932
+Done when:
+
+413
+00:15:53,932 --> 00:15:56,025
+a check that proves a stage works.
+
+414
+00:15:56,375 --> 00:15:58,916
+Portfolio: a project you can show running,
+
+415
+00:15:58,916 --> 00:16:00,076
+with its numbers.
+
+416
+00:16:00,076 --> 00:16:00,850
+And label:
+
+417
+00:16:00,850 --> 00:16:03,778
+the honest note on whether a number was measured,
+
+418
+00:16:03,778 --> 00:16:05,214
+simulated, calculated,
+
+419
+00:16:05,214 --> 00:16:06,043
+or made up.
+
+420
+00:16:07,293 --> 00:16:08,647
+Recap of the road.
+
+421
+00:16:08,647 --> 00:16:09,509
+Six stops,
+
+422
+00:16:09,509 --> 00:16:12,340
+frugal coders spend really modest dollars.
+
+423
+00:16:12,340 --> 00:16:14,064
+Run retrieval alongside.
+
+424
+00:16:14,064 --> 00:16:16,403
+Sixteen weeks at ten hours a week,
+
+425
+00:16:16,403 --> 00:16:20,466
+about a hundred fifty to two hundred fifty dollars if you tear
+
+426
+00:16:20,466 --> 00:16:23,729
+down. A forgotten G P U costs more than the path.
+
+427
+00:16:24,079 --> 00:16:26,358
+Check the exam code before you book.
+
+428
+00:16:26,358 --> 00:16:27,783
+Projects beat badges.
+
+429
+00:16:27,783 --> 00:16:29,891
+And label every number you quote.
+
+430
+00:16:29,891 --> 00:16:31,886
+Thank you for learning with me.
+
+431
+00:16:31,886 --> 00:16:35,362
+The notes and code are free at the code notebook dot com.
+
+432
+00:16:35,362 --> 00:16:36,559
+Now go and build.
+
+433
+00:16:37,809 --> 00:16:39,910
+That was the last lesson of the course.
+
+434
+00:16:39,910 --> 00:16:41,620
+Thank you for learning with me.
+
+435
+00:16:41,620 --> 00:16:43,574
+Now go and build your first project.
+
+436
+00:16:43,924 --> 00:16:45,517
+Subscribe so you don't miss it.
+
+437
+00:16:45,517 --> 00:16:46,790
+See you in the notebook.
+
